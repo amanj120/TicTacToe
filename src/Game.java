@@ -13,7 +13,7 @@ public interface Game<T> {
         if(get(coor) == null) {
             board[coor.x][coor.y] = t;
         } else {
-            System.out.println("That square is already filled");
+            System.out.println("That square is already filled YEEEET");
         }
     }
 
