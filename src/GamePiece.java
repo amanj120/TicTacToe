@@ -2,14 +2,12 @@ import java.util.Optional;
 
 public class GamePiece<T>{
 
-    private Optional<T> piece = Optional.empty();
+    private T piece;
 
-    public GamePiece() {
-        piece = Optional.empty();
+    GamePiece() {
+        piece = null;
     }
     public GamePiece(T t){
-        piece = Optional.of(t);
+        piece = t;
     }
-
-
 }
