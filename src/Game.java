@@ -56,9 +56,9 @@ public class Game {
      * the board updates and checks for potential wins
      * @param index
      */
-    public static void registerPlayerMove(int index) {
+    public static void move(int index, int player) {
         if (board[index] == 0) {
-            board[index] = 1;
+            board[index] = player;
             board[0] = index;
             int beforeChecking = board[parent(index)];
             checkWin((index-1)/9);
@@ -77,7 +77,7 @@ public class Game {
      * indeces where the machine can play a piece
      * @return a list of possible net indeces a piece can be played at
      */
-    public List<Integer> getPossibleMoves() {
+    public static List<Integer> getPossibleMoves() {
         int lastMove = board[0];
         List<Integer> ret = new ArrayList<>();
         if(board[parent(lastMove)] != 0) {
@@ -112,6 +112,15 @@ public class Game {
      */
     public static int smaller(int n) {
         return (((n-1) % 9) * 9) + 1;
+    }
+
+    public static void main(String[] args) {
+        PrintBoard.print(board);
+        move(5,1);
+        System.out.println(getPossibleMoves());
+        move(37,2);
+        System.out.println(getPossibleMoves());
+        PrintBoard.print(board);
     }
 
 
