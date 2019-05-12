@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -13,7 +14,7 @@ public class Game {
      * indices 92-172 holds the moves played thus far
      */
     static int[] board = new int[173];
-    public static Random random = new Random();
+    public static Random random = new Random(4);
     private static final int NUM_MOVES = 91;
 
     /**
@@ -21,7 +22,7 @@ public class Game {
      */
     private static boolean checkRows(int start) {
         for(int i = start; i < start+9; i+=3) {
-            if(board[start] != 0 && board[start] == board[start + 1] && board[start+1] == board[start+2]) {
+            if(board[i] != 0 && board[i] == board[i + 1] && board[i + 1] == board[i + 2]) {
                 return true;
             }
         }
@@ -33,7 +34,7 @@ public class Game {
      */
     private static boolean checkCols(int start) {
         for(int i = start; i < start+3; i++) {
-            if(board[start] != 0 && board[start] == board[start + 3] && board[start+3] == board[start+6]) {
+            if(board[i] != 0 && board[i] == board[i + 3] && board[i+3] == board[i+6]) {
                 return true;
             }
         }
@@ -65,10 +66,12 @@ public class Game {
     private static void checkWin() {
         int last = getIndexOfLastMove();
         int start = begin(board[last]);
-        if(checkCols(start) || checkDiag(start) || checkRows(start)) {
-            board[parent(start)] = board[board[last]];
-            if(checkCols(81) || checkDiag(81) || checkRows(81)) {
-                board[90] = board[parent(start)];
+        if(board[parent(start)] == 0) {
+            if(checkCols(start) || checkDiag(start) || checkRows(start)) {
+                board[parent(start)] = board[board[last]];
+                if (checkCols(81) || checkDiag(81) || checkRows(81)) {
+                    board[90] = board[parent(start)];
+                }
             }
         }
     }
@@ -98,8 +101,9 @@ public class Game {
      */
     public static List<Integer> getPossibleMoves() {
         int last = getIndexOfLastMove();
+
         List<Integer> ret = new ArrayList<>();
-        if(board[parent(board[last])] != 0) {
+        if(board[parent(board[last])] != 0 || board[parent(send(board[last]))] != 0) {
             for(int i = 0; i < 81; i++) {
                 if(board[i] == 0) {
                     ret.add(i);
@@ -177,7 +181,9 @@ public class Game {
 
     public static void main(String[] args) {
         init();
-        PrintBoard.print();
+        //PrintBoard.print();
+        //int[] m = {7,64,9,1,10,12,30,28,11,71,79,65,19,40,37,42,55,6,58,39,29,24,57,32,51,56,25,69,61,63};
+
         movePrint(7);
         movePrint(64);
         movePrint(9);
@@ -187,18 +193,26 @@ public class Game {
         movePrint(30);
         movePrint(28);
         movePrint(11);
-        revertPrint();
-        revertPrint();
-        movePrint(28);
-        movePrint(11);
+        //revertPrint();
+        //revertPrint();
+        //movePrint(28);
+        //movePrint(11);
         System.out.println("here");
         System.out.println(simulate());
+        //61
+        /*for(int i = 0; i < m.length - 2; i++) {
+            movePrint(m[i]);
+        }
+        movePrint(m[m.length - 2]);*/
+
     }
 
     private static void movePrint(int n) {
+        System.out.println(n + ":\t" + PrintBoard.getSeq(n));
         move(n);
         PrintBoard.print();
-        System.out.println(n + "\t\t" + getPossibleMoves().toString());
+        System.out.println(Arrays.toString(board));
+        System.out.println(getPossibleMoves().toString());
     }
 
     private static void revertPrint(){
