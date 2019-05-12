@@ -2,70 +2,91 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
-    public static int[] board = new int[92];
-    //indeces 1-81 are the individual 81 pieces of the board
-    //indeces 82-90 store the 9 3x3 boards
-    //index 91 stores the winner of the game (if any)
-    //index 0 says the index of the last move played
+
+    /**
+     * holds all the inforomation of the game
+     * index 0-80 hold the actual 9x9 board
+     * indices 81-89 holds the underlying 3x3 board
+     * index 90 holds the winner of the game (if there is one)
+     * index 91 holds the number of moves played
+     * indices 92-172 holds the moves played thus far
+     */
+    private static int[] board = new int[173];
+
+    private static final int NUM_MOVES = 91;
+
+
+    /**
+     * checks the rows of the last move played
+     */
+    private static boolean checkRows(int start) {
+        for(int i = start; i < start+9; i+=3) {
+            if(board[start] != 0 && board[start] == board[start + 1] && board[start+1] == board[start+2]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * checks the columns of the last move played
+     */
+    private static boolean checkCols(int start) {
+        for(int i = start; i < start+3; i++) {
+            if(board[start] != 0 && board[start] == board[start + 3] && board[start+3] == board[start+6]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * checks the columns of the last move played
+     */
+    private static boolean checkDiag(int s) {
+        if(board[s] != 0 && board[s] == board[s + 4] && board[s + 4] == board[s + 8]) {
+            return true;
+        } else if (board[s + 2] != 0 && board[s + 2] == board[s + 4] && board[s + 4] == board[s + 6]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static int getIndexOfLastMove() {
+        return NUM_MOVES + 91;
+    }
 
     /**
      * Given a borad index (0-8 for the actual 81 piece game, 9 for the underlying 3x3 game)
      * This method checks if that board number has a player that won, and in the case that it does,
      * it updates the underlying board
-     * @param boardNum the board number being checked
      */
-    public static void checkWin(int boardNum) {
-        int start = boardNum * 9 + 1;
-        int[][] mini = new int[3][3];
-        for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < 3; j++) {
-                mini[i][j] = board[start + i*3 + j];
+    private static void checkWin() {
+        int last = getIndexOfLastMove();
+        int start = begin(last);
+        if(checkCols(start) || checkDiag(start) || checkRows(start)) {
+            board[parent(start)] = board[last];
+            if(checkCols(81) || checkDiag(81) || checkRows(81)) {
+                board[90] = board[parent(start)];
             }
-        }
-        int winner = 0;
-        //rows
-        for(int i = 0; i < 3; i++) {
-            if(mini[i][0] != 0) {
-                if(mini[i][0] == mini[i][1] && mini[i][1] == mini[i][2]) {
-                    winner = mini[i][0];
-                }
-            }
-        }
-        //columns
-        for(int i = 0; i < 3; i++) {
-            if(mini[0][i] != 0) {
-                if(mini[0][i] == mini[1][i] && mini[1][i] == mini[2][i]) {
-                    winner = mini[i][0];
-                }
-            }
-        }
-        //diagonals
-        if(mini[0][0] != 0 && mini[0][0] == mini[1][1] && mini[1][1] == mini[2][2]) {
-            winner = mini[0][0];
-        }
-        if(mini[2][0] != 0 && mini[2][0] == mini[1][1] && mini[1][1] == mini[0][2]) {
-            winner = mini[2][0];
-        }
-        if(winner != 0) {
-            board[82 + boardNum] = winner;
         }
     }
+
 
     /**
      * When the player (represented by a 1 in the board) selects an index to place the piece at,
      * the board updates and checks for potential wins
-     * @param index
+     * @param index the index of the move being played
      */
-    public static void move(int index, int player) {
+    public static void move(int index) {
         if (board[index] == 0) {
-            board[index] = player;
-            board[0] = index;
-            int beforeChecking = board[parent(index)];
-            checkWin((index-1)/9);
-            if (board[parent(index)] != beforeChecking) {
-                checkWin(9);
-            }
-            if(board[91] != 0) {
+            board[NUM_MOVES]++;
+            board[index] = (board[NUM_MOVES] % 2) + 1;
+            board[getIndexOfLastMove()] = index;
+            checkWin();
+            if(board[90] != 0) {
                 System.out.println("Game Over");
             }
         } else {
@@ -77,8 +98,8 @@ public class Game {
      * indeces where the machine can play a piece
      * @return a list of possible net indeces a piece can be played at
      */
-    public static List<Integer> getPossibleMoves() {
-        int lastMove = board[0];
+    public static List<Integer> getPossibleMoves(int[] board) {
+        int lastMove = getIndexOfLastMove();
         List<Integer> ret = new ArrayList<>();
         if(board[parent(lastMove)] != 0) {
             for(int i = 1; i <=81; i++) {
@@ -87,7 +108,7 @@ public class Game {
                 }
             }
         } else {
-            int start = smaller(lastMove);
+            int start = begin(lastMove);
             for(int i = start; i < start + 9; i++) {
                 if(board[i] == 0) {
                     ret.add(i);
@@ -97,29 +118,43 @@ public class Game {
         return ret;
     }
 
+    public static void revert() {
+        int last = getIndexOfLastMove();
+        board[last] = 0;
+        board[parent(last)] = 0;
+        board[90] = 0;
+        checkWin();
+        board[NUM_MOVES]--;
+        board[last] = 0;
+    }
+
     /**
      * given an index, it returns the index of parent board it belongs to
      */
-    public static int parent(int n) {
-        return ((n-1)/9) + 82;
+    private static int parent(int n) {
+        return ((n)/9) + 81;
     }
 
     /**
-     * given an index of a piece, it returns the start of
-     * the board it corresponds to
-     * @param n
-     * @return
+     * returns the beginning of the 3x3 board given an index on the board
      */
-    public static int smaller(int n) {
-        return (((n-1) % 9) * 9) + 1;
+    private static int begin(int n) {
+        if(n >= 90) {
+            throw new IllegalArgumentException("You can't call begin on an index higher than 89");
+        } else {
+            return ((n/9) * 9);
+        }
+    }
+
+    /**
+     * resets the board
+     */
+    private static void init() {
+        board = new int[92];
     }
 
     public static void main(String[] args) {
-        PrintBoard.print(board);
-        move(5,1);
-        System.out.println(getPossibleMoves());
-        move(37,2);
-        System.out.println(getPossibleMoves());
+        init();
         PrintBoard.print(board);
     }
 

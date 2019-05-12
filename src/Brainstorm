@@ -1,0 +1,34 @@
+Game needs the following functions:
+
+check for a win
+be able to revert moves all the way to the beginning
+register a player move
+return a list of possible moves for the current player
+be able to simulate a full game randomly while still maintining the current state given a starting point
+
+
+int[] indeces 0-80 should be the 81 actual pieces of the board
+indeces 81-89 represent the nine 3x3 boards
+index 90 stores the winner of the game
+index 91 stores the index of the last move
+    the player of the last move does not need to be stored
+index 92 stores the number of the move being played
+indeces 93 - 173 store the order of the moves
+
+check for a win stays the same
+registering a move means putting the move on the end of the array
+    then checkwin
+    then alter the rest of the board as necessary
+
+    reverting a move means replacing the last move with azero,
+    replacing the corresponding 3x3 board with a 0,
+    and the game board with a 0
+    and then running checkwin
+
+    Checkwin only needs to check the last move played
+
+    No methods (except move) should take in parameters then because everything is stored in the board
+
+    all of this can be stored in a byte[] which makes it even less memory intensive
+
+    Could run on arduino???
