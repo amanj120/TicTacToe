@@ -12,9 +12,10 @@ public class Game {
      * index 90 holds the winner of the game (if there is one)
      * index 91 holds the number of moves played
      * indices 92-172 holds the moves played thus far
+     * arbitrarily: 1 == X (><), 2 == O (<>)
      */
     static int[] board = new int[173];
-    public static Random random = new Random(4);
+    private static Random random = new Random();
     private static final int NUM_MOVES = 91;
 
     /**
@@ -54,6 +55,11 @@ public class Game {
         }
     }
 
+    /**
+     * board[getIndexOfLastMove()] will return the index of the last move
+     * board[board[getIndexOfLastMove()]] will return the piece placed at the last move
+     * @return the index of the board that contains the index of the last move played
+     */
     private static int getIndexOfLastMove() {
         return board[NUM_MOVES] + 91;
     }
@@ -76,6 +82,13 @@ public class Game {
         }
     }
 
+    public static boolean checkGame() {
+        return board[90] != 0;
+    }
+
+    public static int getWinner() {
+        return board[90];
+    }
     /**
      * When the player (represented by a 1 in the board) selects an index to place the piece at,
      * the board updates and checks for potential wins
@@ -87,9 +100,6 @@ public class Game {
             board[index] = (board[NUM_MOVES] % 2) + 1; //sets it to not 0
             board[getIndexOfLastMove()] = index; //sets the log of moves played
             checkWin();
-            if(board[90] != 0) {
-                System.out.println("Game Over");
-            }
         } else {
             throw new IllegalArgumentException("That index already has another player's piece on it");
         }
@@ -101,7 +111,6 @@ public class Game {
      */
     public static List<Integer> getPossibleMoves() {
         int last = getIndexOfLastMove();
-
         List<Integer> ret = new ArrayList<>();
         if(board[parent(board[last])] != 0 || board[parent(send(board[last]))] != 0) {
             for(int i = 0; i < 81; i++) {
@@ -120,18 +129,19 @@ public class Game {
         return ret;
     }
 
-    public static void revert() {
+    private static void revert() {
         int last = getIndexOfLastMove();
+        board[NUM_MOVES]--;
         board[board[last]] = 0;
         board[parent(board[last])] = 0;
         board[90] = 0;
         checkWin();
-        board[NUM_MOVES]--;
         board[last] = 0;
     }
 
     /**
      * given an index, it returns the index of parent board it belongs to
+     * precondition: n < 81
      */
     private static int parent(int n) {
         return (n/9) + 81;
@@ -139,15 +149,16 @@ public class Game {
 
     /**
      * returns the beginning of the 3x3 board given an index on the board
+     * precondition: n < 90
      */
     private static int begin(int n) {
-        if(n >= 90) {
-            throw new IllegalArgumentException("You can't call begin on an index higher than 89");
-        } else {
-            return ((n/9) * 9);
-        }
+        return ((n/9) * 9);
     }
 
+    /**
+     * finds the index of the next move
+     * precondition: n < 81
+     */
     private static int send(int n) {
         return (n%9) * 9;
     }
@@ -155,7 +166,7 @@ public class Game {
     /**
      * resets the board
      */
-    private static void init() {
+    public static void init() {
         board = new int[173];
     }
 
@@ -163,67 +174,46 @@ public class Game {
      * simulates a full game
      * @return 1 if the computer won, 0 if the player won
      */
-    public static int simulate() {
+    private static int simulate() {
         if(board[90] != 0) {
-            return board[90] % 2;
+            return board[90];
         } else {
             List<Integer> moves = getPossibleMoves();
-            if(moves.size() == 0) {
+            if(moves.size() == 0) { //tied game
                 return -1;
             }
             int nextIdx = random.nextInt(moves.size());
-            movePrint(moves.get(nextIdx));
+            move(moves.get(nextIdx));
             int x = simulate();
             revert();
             return x;
         }
     }
 
-    public static void main(String[] args) {
-        init();
-        //PrintBoard.print();
-        //int[] m = {7,64,9,1,10,12,30,28,11,71,79,65,19,40,37,42,55,6,58,39,29,24,57,32,51,56,25,69,61,63};
-
-        movePrint(7);
-        movePrint(64);
-        movePrint(9);
-        movePrint(1);
-        movePrint(10);
-        movePrint(12);
-        movePrint(30);
-        movePrint(28);
-        movePrint(11);
-        //revertPrint();
-        //revertPrint();
-        //movePrint(28);
-        //movePrint(11);
-        System.out.println("here");
-        System.out.println(simulate());
-        //61
-        /*for(int i = 0; i < m.length - 2; i++) {
-            movePrint(m[i]);
-        }
-        movePrint(m[m.length - 2]);*/
-
+    /**
+     * simulates a full game given a move to make
+     * reverts the move at the ends
+     * @param m the index of the move to make
+     * @return -1 if the simulation ends in a tie, 1 if X wins 2 if O wins
+     */
+    public static int simulate(int m) {
+        move(m);
+        int ret = simulate();
+        revert();
+        return ret;
     }
 
     private static void movePrint(int n) {
-        System.out.println(n + ":\t" + PrintBoard.getSeq(n));
+        System.out.println(n + ":\t" + BoardIO.getSeq(n));
         move(n);
-        PrintBoard.print();
+        BoardIO.print();
         System.out.println(Arrays.toString(board));
         System.out.println(getPossibleMoves().toString());
     }
 
     private static void revertPrint(){
         revert();
-        PrintBoard.print();
+        BoardIO.print();
         System.out.println(getPossibleMoves().toString());
     }
-
-    @Override
-    public String toString() {
-        return PrintBoard.asString();
-    }
-
 }

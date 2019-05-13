@@ -1,6 +1,6 @@
 import java.awt.font.GlyphMetrics;
 
-public class PrintBoard {
+public class BoardIO {
     private static final String format = "" +
             "A0 A1 A2 | B0 B1 B2 | C0 C1 C2\n" +
             "A3 A4 A5 | B3 B4 B5 | C3 C4 C5\n" +
@@ -40,4 +40,11 @@ public class PrintBoard {
     public static String getSeq(int i){
         return (char)((i/9) + 65) + "" + ((i)%9);
     }
+
+    public static int getInt(String seq){
+        int a = (int) seq.toUpperCase().charAt(0);
+        int b = Integer.parseInt(seq.charAt(1) + "");
+        return ((a - 65) * 9) + b;
+    }
+
 }
