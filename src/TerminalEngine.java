@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.Scanner;
 
-public class TerminalEngine extends Engine {
+class TerminalEngine extends Engine {
 
     private static Scanner sc;
 

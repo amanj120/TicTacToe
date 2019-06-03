@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoardIO {
+class BoardIO {
     private static final String format = "" +
             "A0 A1 A2 | B0 B1 B2 | C0 C1 C2\n" +
             "A3 A4 A5 | B3 B4 B5 | C3 C4 C5\n" +
@@ -15,11 +15,11 @@ public class BoardIO {
             "G3 G4 G5 | H3 H4 H5 | I3 I4 I5\n" +
             "G6 G7 G8 | H6 H7 H8 | I6 I7 I8\n";
 
-    public static void printBoard() {
+    static void printBoard() {
         System.out.println(asString());
     }
 
-    public static void printPossibleMoves() {
+    static void printPossibleMoves() {
         List<String> print = new ArrayList<>();
         List<Integer> moves = Game.getPossibleMoves();
         for(Integer i : moves) {
@@ -28,7 +28,7 @@ public class BoardIO {
         System.out.println(print);
     }
 
-    public static String asString() {
+    private static String asString() {
         int[] board = Game.board;
         String p = String.copyValueOf(format.toCharArray());
         for(int i = 0; i < 81; i++) {
@@ -47,11 +47,11 @@ public class BoardIO {
         return p;
     }
 
-    public static String getSeq(int i){
+    static String getSeq(int i){
         return (char)((i/9) + 65) + "" + ((i)%9);
     }
 
-    public static int getInt(String seq){
+    static int getInt(String seq){
         int a = (int) seq.toUpperCase().charAt(0);
         int b = Integer.parseInt(seq.charAt(1) + "");
         return ((a - 65) * 9) + b;
