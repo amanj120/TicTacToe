@@ -1,4 +1,5 @@
-import java.awt.font.GlyphMetrics;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BoardIO {
     private static final String format = "" +
@@ -14,8 +15,17 @@ public class BoardIO {
             "G3 G4 G5 | H3 H4 H5 | I3 I4 I5\n" +
             "G6 G7 G8 | H6 H7 H8 | I6 I7 I8\n";
 
-    public static void print() {
+    public static void printBoard() {
         System.out.println(asString());
+    }
+
+    public static void printPossibleMoves() {
+        List<String> print = new ArrayList<>();
+        List<Integer> moves = Game.getPossibleMoves();
+        for(Integer i : moves) {
+            print.add(getSeq(i));
+        }
+        System.out.println(print);
     }
 
     public static String asString() {

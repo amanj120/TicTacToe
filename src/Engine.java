@@ -1,24 +1,22 @@
-public interface Engine {
+public abstract class Engine {
 
-    int requestMoveUser();
-    default int requestMoveCPU() {
-        //TODO fill this out
-        return 0;
+    static int requestUserMove() {return 0;}
+    static int requestCPUMove() {return 0;}
+
+
+    public static void registerUserMove(int move) {
+        Game.move(move);
     }
 
-    default void registerUserMove() {
-        Game.move(requestMoveUser());
+    public static void registerCPUMove(int move) {
+        Game.move(move);
     }
 
-    default void registerCPUMove() {
-        Game.move(requestMoveCPU());
-    }
-
-    default boolean checkGameOver() {
+    public static boolean checkGameOver() {
         return Game.checkGame();
     }
 
-    default int getWinner() {
+    public static int getWinner() {
         return Game.getWinner();
     }
 }

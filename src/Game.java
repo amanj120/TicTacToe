@@ -110,6 +110,13 @@ public class Game {
      * @return a list of possible net indeces a piece can be played at
      */
     public static List<Integer> getPossibleMoves() {
+        if(board[NUM_MOVES] == 0) {
+            List<Integer> ret = new ArrayList<>();
+            for(int i = 0; i < 81; i++) {
+                ret.add(i);
+            }
+            return ret;
+        }
         int last = getIndexOfLastMove();
         List<Integer> ret = new ArrayList<>();
         if(board[parent(board[last])] != 0 || board[parent(send(board[last]))] != 0) {
@@ -206,14 +213,14 @@ public class Game {
     private static void movePrint(int n) {
         System.out.println(n + ":\t" + BoardIO.getSeq(n));
         move(n);
-        BoardIO.print();
+        BoardIO.printBoard();
         System.out.println(Arrays.toString(board));
         System.out.println(getPossibleMoves().toString());
     }
 
     private static void revertPrint(){
         revert();
-        BoardIO.print();
+        BoardIO.printBoard();
         System.out.println(getPossibleMoves().toString());
     }
 }

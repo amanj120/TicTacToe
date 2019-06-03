@@ -1,13 +1,23 @@
-import java.util.Random;
+import java.util.List;
 import java.util.Scanner;
 
-public class TerminalEngine implements Engine {
+public class TerminalEngine extends Engine {
 
     private static Scanner sc;
 
     public static void main(String[] args) {
         sc = new Scanner(System.in);
-
+        while(!checkGameOver()) {
+            BoardIO.printBoard();
+            BoardIO.printPossibleMoves();
+            registerUserMove(requestUserMove());
+            BoardIO.printBoard();
+            if(checkGameOver()) {
+                System.out.println("Winner " + getWinner());
+            }
+            registerCPUMove(requestCPUMove());
+        }
+        System.out.println("Winner " + getWinner());
     }
     /*
     game flow:
@@ -23,13 +33,14 @@ public class TerminalEngine implements Engine {
     }
     */
 
-    public int requestMoveUser() {
+    public static int requestUserMove() {
         System.out.println("Please select a move");
         String input = sc.next();
+        List<Integer> possibleMoves = Game.getPossibleMoves();
         while(true) {
             try {
                 int x = BoardIO.getInt(input);
-                if(Game.getPossibleMoves().contains(x)) {
+                if(possibleMoves.contains(x)) {
                     return x;
                 }
             } catch (Exception e) {
@@ -39,4 +50,8 @@ public class TerminalEngine implements Engine {
         }
     }
 
+    public static int requestCPUMove() {
+        List<Integer> possibleMoves = Game.getPossibleMoves();
+        return possibleMoves.get((int)(Math.random() * (double)possibleMoves.size()));
+    }
 }
