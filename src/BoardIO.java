@@ -48,7 +48,7 @@ class BoardIO {
     }
 
     static String getSeq(int i){
-        return (char)((i/9) + 65) + "" + ((i)%9);
+        return (char)(((i)/9) + 65) + "" + ((i)%9);
     }
 
     static int getInt(String seq){

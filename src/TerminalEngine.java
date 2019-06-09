@@ -1,23 +1,41 @@
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 class TerminalEngine extends Engine {
 
     private static Scanner sc;
-
+    static String[] testCase = {
+            "A2", "C8", "I4", "E1",
+            "B0", "A7", "H0", "A0",
+            "A4", "E2", "C1", "B1",
+            "B8", "I2", "C7", "H2",
+            "C4", "A1", "B4", "D2"};
     public static void main(String[] args) {
+
+        play();
+
+    }
+
+    public static void play() {
         sc = new Scanner(System.in);
-        while(!checkGameOver()) {
+        Game.init();
+        int idx = 0;
+        while(true) {
             BoardIO.printBoard();
             BoardIO.printPossibleMoves();
-            registerUserMove(requestUserMove());
+            registerUserMove(BoardIO.getInt(testCase[idx]));
+            idx++;
             BoardIO.printBoard();
             if(checkGameOver()) {
                 System.out.println("Winner " + getWinner());
             }
-            registerCPUMove(requestCPUMove());
+            requestCPUMove();
+            registerCPUMove(BoardIO.getInt(testCase[idx]));
+            idx++;
         }
-        System.out.println("Winner " + getWinner());
+        //System.out.println("Winner " + getWinner());
     }
     /*
     game flow:
@@ -43,6 +61,8 @@ class TerminalEngine extends Engine {
                 if(possibleMoves.contains(x)) {
                     return x;
                 }
+                System.out.println("Please select a move");
+                input = sc.next();
             } catch (Exception e) {
                 System.out.println("That was an invalid move, try again");
                 input = sc.next();
@@ -52,6 +72,28 @@ class TerminalEngine extends Engine {
 
     public static int requestCPUMove() {
         List<Integer> possibleMoves = Game.getPossibleMoves();
-        return possibleMoves.get((int)(Math.random() * (double)possibleMoves.size()));
+        System.out.println("possible moves for the CPU:");
+        BoardIO.printPossibleMoves();
+        int[] probs = new int[possibleMoves.size()];
+        for(int i = 0; i < probs.length; i++) {
+            for(int t = 0; t < 2; t++) {
+                if (Game.simulate(possibleMoves.get(i)) == 2) {
+                    probs[i]++;
+                }
+            }
+        }
+        //System.out.println(Arrays.toString(probs));
+        int idx = 0;
+        for (int i = 0; i < probs.length; i++) {
+            if(probs[i] > probs[idx]) {
+                idx = i;
+            }
+        }
+        System.out.println(Arrays.toString(probs));
+        System.out.println("CPU Chooses " + BoardIO.getSeq(possibleMoves.get(idx)));
+        Scanner s = new Scanner(System.in);
+        String l = s.next();
+        return BoardIO.getInt(l);
+        //return possibleMoves.get((int)(Math.random() * (double)possibleMoves.size()));
     }
 }
