@@ -3,7 +3,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class Game {
+class Game {
 
     /**
      * holds all the inforomation of the game
@@ -15,8 +15,8 @@ public class Game {
      * arbitrarily: 1 == X (><), 2 == O (<>)
      */
     static int[] board = new int[173];
-    private static Random random = new Random();
-    private static final int NUM_MOVES = 91;
+    private static final Random random = new Random();
+    private static final int INDEX_OF_NUM_MOVES = 91;
 
     /**
      * checks the rows of the last move played
@@ -48,20 +48,27 @@ public class Game {
     private static boolean checkDiag(int s) {
         if(board[s] != 0 && board[s] == board[s + 4] && board[s + 4] == board[s + 8]) {
             return true;
-        } else if (board[s + 2] != 0 && board[s + 2] == board[s + 4] && board[s + 4] == board[s + 6]) {
-            return true;
         } else {
-            return false;
+            return (board[s + 2] != 0 && board[s + 2] == board[s + 4] && board[s + 4] == board[s + 6]);
         }
     }
 
-    /**
-     * board[getIndexOfLastMove()] will return the index of the last move
-     * board[board[getIndexOfLastMove()]] will return the piece placed at the last move
-     * @return the index of the board that contains the index of the last move played
-     */
-    private static int getIndexOfLastMove() {
-        return board[NUM_MOVES] + 91;
+    private static void incrementNumberOfMovesByOne(int move) {
+        board[INDEX_OF_NUM_MOVES]++;
+        board[getIndexOfPositionOfLastMove()] = move;
+    }
+
+    private static void decrementNumberOfMovesByOne() {
+        board[getIndexOfPositionOfLastMove()] = 0;
+        board[INDEX_OF_NUM_MOVES]--;
+    }
+
+    private static int getIndexOfPositionOfLastMove() {
+        return board[INDEX_OF_NUM_MOVES] + 91;
+    }
+
+    private static int getPositonOfLastMove() {
+        return board[getIndexOfPositionOfLastMove()];
     }
 
     /**
@@ -70,7 +77,7 @@ public class Game {
      * it updates the underlying board
      */
     private static void checkWin() {
-        int last = getIndexOfLastMove();
+        int last = getPositonOfLastMove();
         int start = begin(board[last]);
         if(board[parent(start)] == 0) {
             if(checkCols(start) || checkDiag(start) || checkRows(start)) {
@@ -101,7 +108,7 @@ public class Game {
             board[getIndexOfLastMove()] = index; //sets the log of moves played
             checkWin();
         } else {
-            throw new IllegalArgumentException("That index already has another player's piece on it");
+            throw new IllegalArgumentException("The index " + index + " already has another player's piece on it");
         }
     }
 
@@ -110,6 +117,13 @@ public class Game {
      * @return a list of possible net indeces a piece can be played at
      */
     public static List<Integer> getPossibleMoves() {
+        if(board[NUM_MOVES] == 0) {
+            List<Integer> ret = new ArrayList<>();
+            for(int i = 0; i < 81; i++) {
+                ret.add(i);
+            }
+            return ret;
+        }
         int last = getIndexOfLastMove();
         List<Integer> ret = new ArrayList<>();
         if(board[parent(board[last])] != 0 || board[parent(send(board[last]))] != 0) {
@@ -172,7 +186,7 @@ public class Game {
 
     /**
      * simulates a full game
-     * @return 1 if the computer won, 0 if the player won
+     * @return 1 if the computer won, 2 if the player won
      */
     private static int simulate() {
         if(board[90] != 0) {
@@ -197,23 +211,29 @@ public class Game {
      * @return -1 if the simulation ends in a tie, 1 if X wins 2 if O wins
      */
     public static int simulate(int m) {
+        System.out.println("before simulating move " + m);
+        BoardIO.printBoard();
         move(m);
         int ret = simulate();
+        System.out.println("after simulating move " + m);
+        BoardIO.printBoard();
         revert();
+        System.out.println("after reverting move " + m);
+        BoardIO.printBoard();
         return ret;
     }
 
     private static void movePrint(int n) {
         System.out.println(n + ":\t" + BoardIO.getSeq(n));
         move(n);
-        BoardIO.print();
-        System.out.println(Arrays.toString(board));
-        System.out.println(getPossibleMoves().toString());
+        BoardIO.printBoard();
+        //System.out.println(Arrays.toString(board));
+        BoardIO.printPossibleMoves();
     }
 
     private static void revertPrint(){
         revert();
-        BoardIO.print();
-        System.out.println(getPossibleMoves().toString());
+        BoardIO.printBoard();
+        BoardIO.printPossibleMoves();
     }
 }
