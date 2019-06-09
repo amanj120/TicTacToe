@@ -24,7 +24,6 @@ public class BoardIO {
         for(int i = 0; i < 81; i++) {
             if(board[i] != 0) {
                 String seq = getSeq(i);
-                //System.out.println(seq);
                 p = p.replace(seq, (board[i] == 1? "><" : "<>"));
             }
         }
