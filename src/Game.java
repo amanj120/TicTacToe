@@ -53,6 +53,10 @@ class Game {
         }
     }
 
+    private static int getNumMove() {
+        return board[INDEX_OF_NUM_MOVES];
+    }
+
     private static void incrementNumberOfMovesByOne(int move) {
         board[INDEX_OF_NUM_MOVES]++;
         board[getIndexOfPositionOfLastMove()] = move;
@@ -78,7 +82,7 @@ class Game {
      */
     private static void checkWin() {
         int last = getPositonOfLastMove();
-        int start = begin(board[last]);
+        int start = begin(last);
         if(board[parent(start)] == 0) {
             if(checkCols(start) || checkDiag(start) || checkRows(start)) {
                 board[parent(start)] = board[board[last]];
@@ -103,15 +107,13 @@ class Game {
      */
     public static void move(int index) {
         if (board[index] == 0) {
-            board[NUM_MOVES]++; //increases number of moves
-            board[index] = (board[NUM_MOVES] % 2) + 1; //sets it to not 0
-            board[getIndexOfLastMove()] = index; //sets the log of moves played
+            incrementNumberOfMovesByOne(index);
+            board[index] = getNumMove(); //sets it to not 0
             checkWin();
         } else {
             throw new IllegalArgumentException("The index " + index + " already has another player's piece on it");
         }
     }
-
     /** given the last move played by the player, this method generates a list of
      * indeces where the machine can play a piece
      * @return a list of possible net indeces a piece can be played at
@@ -188,7 +190,7 @@ class Game {
      * simulates a full game
      * @return 1 if the computer won, 2 if the player won
      */
-    private static int simulate() {
+    private static int simulate(int[] board) {
         if(board[90] != 0) {
             return board[90];
         } else {
@@ -202,6 +204,10 @@ class Game {
             revert();
             return x;
         }
+    }
+
+    private static int simulate() {
+        int[] b = Arrays.copyOf()
     }
 
     /**
