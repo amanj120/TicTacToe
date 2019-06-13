@@ -188,7 +188,7 @@ class Game {
      * simulates a full game
      * @return 1 if the computer won, 2 if the player won
      */
-    private static int simulate() {
+    private static int simulate(int[] board) {
         if(board[90] != 0) {
             return board[90];
         } else {
