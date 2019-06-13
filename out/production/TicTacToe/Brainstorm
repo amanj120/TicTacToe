@@ -31,4 +31,61 @@ registering a move means putting the move on the end of the array
 
     all of this can be stored in a byte[] which makes it even less memory intensive
 
+<<<<<<< HEAD
     Could run on arduino???
+=======
+    Could run on arduino???
+Game Main method (for debugging)
+    /*public static void main(String[] args) {
+        init();
+        //PrintBoard.print();
+        //int[] m = {7,64,9,1,10,12,30,28,11,71,79,65,19,40,37,42,55,6,58,39,29,24,57,32,51,56,25,69,61,63};
+
+        //move(0);
+        *//*move(64);
+        move(9);
+        move(1);
+        move(10);
+        move(12);
+        move(30);
+        move(28);
+        move(11);*//*
+        //revertPrint();
+        //revertPrint();
+        //movePrint(28);
+        //movePrint(11);
+        //System.out.println("here");
+        int wins = 0;
+        int losses = 0;
+        int ties = 0;
+        long start = System.currentTimeMillis();
+        for(int i = 0; i < 10000; i++) {
+            int x = simulate();
+            //System.out.println(x);
+            if (x == 1){
+                losses++;
+            } else if (x == -1) {
+                ties++;
+            } else {
+                wins++;
+            }
+        }
+        long end = System.currentTimeMillis();
+
+        System.out.println("wins: " + wins + " losses: " + losses + " ties: " + ties + " time: " + (end-start));
+        //61
+        *//*for(int i = 0; i < m.length - 2; i++) {
+            movePrint(m[i]);
+        }
+        movePrint(m[m.length - 2]);
+        PrintBoard.print();
+        System.out.println(Arrays.toString(board));
+        System.out.println(getPossibleMoves().toString());
+        //System.out.println(simulate());
+        *//*
+    }*/
+
+to make this parallelizable:
+
+the board needs to be copied into the gpu, and needs to be lightweight
+>>>>>>> 43bc4fe5e076f268f5f2a6c6b7baf98f3982a4a6

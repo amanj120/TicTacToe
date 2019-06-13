@@ -81,3 +81,7 @@ Game Main method (for debugging)
         //System.out.println(simulate());
         *//*
     }*/
+
+to make this parallelizable:
+
+the board needs to be copied into the gpu, and needs to be lightweight

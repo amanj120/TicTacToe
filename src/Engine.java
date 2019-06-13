@@ -1,4 +1,6 @@
+/*
 abstract class Engine {
+
 
     static int requestUserMove() {return 0;}
     static int requestCPUMove() {return 0;}
@@ -20,3 +22,5 @@ abstract class Engine {
         return Game.getWinner();
     }
 }
+
+ */
