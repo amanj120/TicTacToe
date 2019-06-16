@@ -31,9 +31,6 @@ registering a move means putting the move on the end of the array
 
     all of this can be stored in a byte[] which makes it even less memory intensive
 
-<<<<<<< HEAD
-    Could run on arduino???
-=======
     Could run on arduino???
 Game Main method (for debugging)
     /*public static void main(String[] args) {
@@ -88,4 +85,3 @@ Game Main method (for debugging)
 to make this parallelizable:
 
 the board needs to be copied into the gpu, and needs to be lightweight
->>>>>>> 43bc4fe5e076f268f5f2a6c6b7baf98f3982a4a6

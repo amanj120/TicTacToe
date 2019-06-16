@@ -114,7 +114,7 @@ class GameLight {
                 return -1;
             }
             int nextIdx = random.nextInt(moves.size());
-            movePrint(moves.get(nextIdx), board);
+            move(moves.get(nextIdx), board);
             return simulate(board);
         }
     }
@@ -144,10 +144,66 @@ class GameLight {
         movePrint(8, board);
         movePrint(72, board);
         movePrint(0, board);
-        System.out.println(simulate(3, board));
+        //System.out.println(simulate(3, board));
 
-        for (int i = 0; i < 128*128 ; i++) {
-            //System.out.println((char)i);
+        ArrayList<pair> pairs = new ArrayList<>();
+
+        List<Integer> nextMoves = getPossibleMoves(board);
+        for(int i : nextMoves) {
+            byte[] copy = Arrays.copyOf(board, 93);
+            move(i, copy);
+            List<Integer> doubleMoves = getPossibleMoves(copy);
+            for(int j : doubleMoves) {
+                pairs.add(new pair(i, j));
+            }
+        }
+        for (pair p : pairs) {
+            int ties = 0;
+            int wins = 0;
+            int losses = 0;
+
+            int first = p.x;
+            int second = p.y;
+
+            for(int i = 0; i < 10000; i++) {
+                byte[] copy = Arrays.copyOf(board, 93);
+                move(first, copy);
+                move(second, copy);
+                int result = simulate(copy);
+                if(result == -1) {
+                    ties++;
+                } else if (result == 1) {
+                    losses++;
+                } else {
+                    wins++;
+                }
+            }
+            System.out.println(p.toString() + " wi: " + wins + " ti: " + ties + " lo: " + losses);
+        }
+
+
+    }
+
+
+    private static class pair {
+        int x;
+        int y;
+
+        private pair(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+        void setX(int x) {
+            this.x = x;
+        }
+
+        void setY(int y) {
+            this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return x + "," + y;
         }
     }
 }
