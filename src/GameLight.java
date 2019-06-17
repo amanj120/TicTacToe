@@ -159,31 +159,16 @@ class GameLight {
                     pairs.add(new pair(i, j));
                 }
             }
-            int[] winprobs = new int[pairs.size()];
+            short[] formattedPairs = new short[pairs.size()];
+            int index = 0;
+            for(pair p : pairs) {
+                formattedPairs[index] = (short)(p.x * 100 + p.y);
+                index++;
+            }
+            short[] winprobs = new short[pairs.size()];
             for (int k = 0; k < pairs.size(); k++) {
-                pair p = pairs.get(k);
-                int ties = 0;
-                int wins = 0;
-                int losses = 0;
-
-                int first = p.x;
-                int second = p.y;
-
-                for (int i = 0; i < 5000; i++) {
-                    byte[] copy = Arrays.copyOf(board, 93);
-                    move(first, copy);
-                    move(second, copy);
-                    int result = simulate(copy);
-                    if (result == -1) {
-                        ties++;
-                    } else if (result == 2) {
-                        losses++;
-                    } else {
-                        wins++;
-                    }
-                }
-                System.out.println(p.toString() + " wi: " + wins + " ti: " + ties + " lo: " + losses);
-                winprobs[k] = wins;
+                kernel(k, board, formattedPairs, winprobs);
+                System.out.println(formattedPairs[k]/100 + "," + formattedPairs[k]%100 + ":\t" + winprobs[k]);
             }
             int[] minimax = new int[getPossibleMoves(board).size()];
             Arrays.fill(minimax, 10000000);
@@ -233,5 +218,24 @@ class GameLight {
         public String toString() {
             return x + "," + y;
         }
+    }
+
+    private static void kernel(int idx, byte[] board, short[] pairs, short[] wins) {
+        final int numTrials = 5000;
+        short p = pairs[idx];
+        int first = p/100;
+        int second = p%100;
+        byte[] copy = Arrays.copyOf(board, 93);
+        move(first, copy);
+        move(second, copy);
+        short w = 0;
+        for(int t = 0; t < numTrials; t++) {
+            byte[] cBoard = Arrays.copyOf(copy, 93);
+            int simulate = simulate(cBoard);
+            if(simulate == 1) {
+                w++;
+            }
+        }
+        wins[idx] = w;
     }
 }
