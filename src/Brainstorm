@@ -85,3 +85,9 @@ Game Main method (for debugging)
 to make this parallelizable:
 
 the board needs to be copied into the gpu, and needs to be lightweight
+
+6/17/19
+
+Need to make finding all pairs more efficient, less array copies
+need to decide if it's worth it to prune branches based on averages, maybe go a layer deeper for each unpruned branch
+gotta be smart
