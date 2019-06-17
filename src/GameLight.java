@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 
 class GameLight {
@@ -135,53 +136,87 @@ class GameLight {
         move(move, board);
         BoardIO.printBoard(board);
         BoardIO.printPossibleMoves(board);
-        System.out.println(Arrays.toString(board));
+        //System.out.println(Arrays.toString(board));
         System.out.println();
     }
 
     public static void main(String[] args) {
         byte[] board = new byte[93];
-        movePrint(8, board);
-        movePrint(72, board);
-        movePrint(0, board);
+        //movePrint(8, board);
+        //movePrint(72, board);
+        //EmovePrint(0, board);
         //System.out.println(simulate(3, board));
+        Scanner sc = new Scanner(System.in);
+        for(int turns = 0; turns < 100; turns ++) {
+            ArrayList<pair> pairs = new ArrayList<>();
 
-        ArrayList<pair> pairs = new ArrayList<>();
-
-        List<Integer> nextMoves = getPossibleMoves(board);
-        for(int i : nextMoves) {
-            byte[] copy = Arrays.copyOf(board, 93);
-            move(i, copy);
-            List<Integer> doubleMoves = getPossibleMoves(copy);
-            for(int j : doubleMoves) {
-                pairs.add(new pair(i, j));
-            }
-        }
-        for (pair p : pairs) {
-            int ties = 0;
-            int wins = 0;
-            int losses = 0;
-
-            int first = p.x;
-            int second = p.y;
-
-            for(int i = 0; i < 10000; i++) {
+            List<Integer> nextMoves = getPossibleMoves(board);
+            for (int i : nextMoves) {
                 byte[] copy = Arrays.copyOf(board, 93);
-                move(first, copy);
-                move(second, copy);
-                int result = simulate(copy);
-                if(result == -1) {
-                    ties++;
-                } else if (result == 1) {
-                    losses++;
-                } else {
-                    wins++;
+                move(i, copy);
+                List<Integer> doubleMoves = getPossibleMoves(copy);
+                for (int j : doubleMoves) {
+                    pairs.add(new pair(i, j));
                 }
             }
-            System.out.println(p.toString() + " wi: " + wins + " ti: " + ties + " lo: " + losses);
+            int[] winprobs = new int[pairs.size()];
+            for (int k = 0; k < pairs.size(); k++) {
+                pair p = pairs.get(k);
+                int ties = 0;
+                int wins = 0;
+                int losses = 0;
+
+                int first = p.x;
+                int second = p.y;
+
+                for (int i = 0; i < 5000; i++) {
+                    byte[] copy = Arrays.copyOf(board, 93);
+                    move(first, copy);
+                    move(second, copy);
+                    int result = simulate(copy);
+                    if (result == -1) {
+                        ties++;
+                    } else if (result == 2) {
+                        losses++;
+                    } else {
+                        wins++;
+                    }
+                }
+                System.out.println(p.toString() + " wi: " + wins + " ti: " + ties + " lo: " + losses);
+                winprobs[k] = wins;
+            }
+            int[] minimax = new int[getPossibleMoves(board).size()];
+            Arrays.fill(minimax, 10000000);
+            for (int i = 0; i < pairs.size(); i++) {
+                int idx = getPossibleMoves(board).indexOf(pairs.get(i).x);
+                minimax[idx] = Math.min(minimax[idx], winprobs[i]);
+            }
+            System.out.println(Arrays.toString(minimax));
+
+            int max = 0;
+            int idx = -1;
+            for (int i = 0; i < minimax.length; i++) {
+                if (minimax[i] > max) {
+                    max = minimax[i];
+                    idx = i;
+                }
+            }
+
+            int move = getPossibleMoves(board).get(idx);
+            movePrint(move, board);
+            if(checkGameOver(board) != 0) {
+                System.out.println("Game over yeet");
+                return;
+            }
+            System.out.println("next Turn?");
+            String a = sc.next();
+            int n = BoardIO.getInt(a);
+            movePrint(n, board);
+            if(checkGameOver(board) != 0) {
+                System.out.println("Game over yeet");
+                return;
+            }
         }
-
-
     }
 
 
@@ -191,13 +226,6 @@ class GameLight {
 
         private pair(int x, int y) {
             this.x = x;
-            this.y = y;
-        }
-        void setX(int x) {
-            this.x = x;
-        }
-
-        void setY(int y) {
             this.y = y;
         }
 
