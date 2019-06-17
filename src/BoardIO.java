@@ -20,11 +20,11 @@ class BoardIO {
 
     private static int[] positions = {157, 159, 161, 196, 198, 200, 235, 237, 239};
 
-    static void printBoard(byte[] board) {
+    public static void printBoard(byte[] board) {
         System.out.println(asString(board));
     }
 
-    static void printPossibleMoves(byte[] board) {
+    public static void printPossibleMoves(byte[] board) {
         List<String> print = new ArrayList<>();
         List<Integer> moves = GameLight.getPossibleMoves(board);
         for(Integer i : moves) {
