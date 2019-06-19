@@ -40,12 +40,10 @@ class BoardIO {
             }
         }
         char[] f = p.toCharArray();
-        for(int i = 81; i < 90; i++) {
-            if(board[i] != 0) {
-                String seq = (char)((i-81) + 10241) + "";
+        for(int i = 81; i < 90; i++)
+            if(board[i] != 0)
                 f[positions[i - 81]] = (board[i] == 1? 'X' : 'O');
-            }
-        }
+
         return String.valueOf(f);
     }
 

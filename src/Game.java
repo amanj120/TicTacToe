@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -31,42 +30,50 @@ class Game {
         if(board[boardIdx + 81] != 0) {
             return board[boardIdx + 81];
         }
-        int start = boardIdx * 9;
-        for(int i = start; i < start+9; i+=3) {
-            if(board[i] != 0 && board[i] == board[i + 1] && board[i + 1] == board[i + 2]) {
-                return board[i];
-            }
+        int s = boardIdx * 9;
+        if(board[s] != 0) { // upper left
+            if(board[s] == board[s + 1] && board[s] == board[s + 2])
+                return board[s];
+            if(board[s] == board[s + 3] && board[s] == board[s + 6])
+                return board[s];
         }
-        for(int i = start; i < start+3; i++) {
-            if(board[i] != 0 && board[i] == board[i + 3] && board[i+3] == board[i+6]) {
-                return board[i];
-            }
+        s += 4;
+        if (board[s] != 0) { // center
+            if(board[s] == board[s + 1] && board[s] == board[s - 1])
+                return board[s];
+            if(board[s] == board[s + 2] && board[s] == board[s - 2])
+                return board[s];
+            if(board[s] == board[s + 3] && board[s] == board[s - 3])
+                return board[s];
+            if(board[s] == board[s + 4] && board[s] == board[s - 4])
+                return board[s];
         }
-        if(board[start] != 0 && board[start] == board[start + 4] && board[start + 4] == board[start + 8]) {
-            return board[start];
-        }
-        if(board[start + 2] != 0 && board[start + 2] == board[start + 4] && board[start + 4] == board[start + 6]){
-            return board[start + 2];
+        s += 4;
+        if (board[s] != 0) { //lower right
+            if(board[s] == board[s - 1] && board[s] == board[s - 2])
+                return board[s];
+            if(board[s] == board[s - 3] && board[s] == board[s - 6])
+                return board[s];
         }
         return 0;
     }
 
-    private static int checkGameOver(byte[] board) {
+    private static byte checkGameOver(byte[] board) {
         return check3x3board(9, board);
     }
 
-    public static void move(int index, byte[] board) {
+    static void move(int index, byte[] board) {
         if(board[index] == 0) {
             board[index] = (byte)((board[NUM_MOVES] % 2) + 1);
             board[NUM_MOVES]++;
             board[LAST_MOVE] = (byte) index;
-            int before = board[parent(((byte)index))];
-            board[parent((byte)index)] = check3x3board((index/9), board);
-            if(before != board[parent((byte)index)]) {
-                board[90] = (byte) checkGameOver(board);
+            int before = board[parent(index)];
+            board[parent(index)] = check3x3board((index/9), board);
+            if(before != board[parent(index)]) {
+                board[90] = checkGameOver(board);
             }
         } else {
-            throw new IllegalArgumentException("not allowed dog");
+            throw new IllegalArgumentException("not a legal move: that space is taken");
         }
     }
 
@@ -74,7 +81,7 @@ class Game {
      * indeces where the machine can play a piece
      * @return a list of possible net indeces a piece can be played at
      */
-    public static List<Integer> getPossibleMoves(byte[] board) {
+    static List<Integer> getPossibleMoves(byte[] board) {
         List<Integer> ret = new ArrayList<>();
         byte last = board[LAST_MOVE];
         if ((board[NUM_MOVES] == 0)|| (board[parent(send(last))] != 0)) {
@@ -99,8 +106,8 @@ class Game {
      * given an index, it returns the index of parent board it belongs to
      * precondition: n < 81
      */
-    private static byte parent(byte n) {
-        return (byte) ((n/9) + 81);
+    private static int parent(int n) {
+        return ((n/9) + 81);
     }
 
     /**
@@ -129,18 +136,7 @@ class Game {
         }
     }
 
-    /**
-     * simulates a full game given a move to make
-     * reverts the move at the ends
-     * @param m the index of the move to make
-     * @return -1 if the simulation ends in a tie, 1 if X wins 2 if O wins
-     */
-    public static int simulate(int m, byte[] board) {
-        movePrint(m, board);
-        return simulate(board);
-    }
-
-    public static void movePrint(int move, byte[] board) {
+    private static void movePrint(int move, byte[] board) {
         System.out.println("moving " + BoardIO.getSeq(move));
         move(move, board);
         BoardIO.printBoard(board);
@@ -161,52 +157,34 @@ class Game {
 //        System.out.println(getPossibleMoves(board));
 //        movePrint(1, board);
         //System.out.println(simulate(3, board));
-        //movePrint(40, board);
+        movePrint(40, board);
         ArrayList<Integer> maxNumPairs = new ArrayList<>();
 
 
         for(int turns = 0; turns < 100; turns ++) {
-            ArrayList<pair> pairs = new ArrayList<>();
 
-            int userMove = registerUserMove(getPossibleMoves(board));
-            movePrint(userMove, board);
 
             if(checkGameOver(board) != 0) {
-                Collections.sort(maxNumPairs);
+                //Collections.sort(maxNumPairs);
                 System.out.println(maxNumPairs.toString());
                 System.out.println("Game over yeet");
                 return;
             }
 
-            List<Integer> nextMoves = getPossibleMoves(board);
-            //System.out.println("next moves: " + nextMoves);
-            for (int i = 0; i < nextMoves.size(); i++) {
-                byte[] copy = copyOf(board, 93);
-                move(nextMoves.get(i), copy);
-                List<Integer> doubleMoves = getPossibleMoves(copy);
-                for (int j = 0; j < doubleMoves.size(); j++) {
-                    pairs.add(new pair(nextMoves.get(i), doubleMoves.get(j)));
-                }
-            }
-            short[] formattedPairs = new short[pairs.size()];
-            int index = 0;
-            for(pair p : pairs) {
-                formattedPairs[index] = (short)(p.x * 100 + p.y);
-                index++;
-            }
-            short[] winprobs = new short[pairs.size()];
+            short[] pairs = findAllPairs(board);
+            short[] winprobs = new short[pairs.length];
             //System.out.println(pairs.toString());
-            for (int k = 0; k < pairs.size(); k++) {
-                kernel(k, board, formattedPairs, winprobs);
+            for (int k = 0; k < pairs.length; k++) {
+                kernel(k, board, pairs, winprobs);
                 //System.out.println(formattedPairs[k]/100 + "," + formattedPairs[k]%100 + ":\t" + winprobs[k]);
-                if(k%(pairs.size()/9) == 0)
-                    System.out.print(k/(pairs.size()/9)+1 + " ");
+                if(k%(pairs.length/9) == 0)
+                    System.out.print(k/(pairs.length/9)+1 + " ");
             }
             System.out.println();
             int[] minimax = new int[getPossibleMoves(board).size()];
             Arrays.fill(minimax, 10000000);
-            for (int i = 0; i < pairs.size(); i++) {
-                int idx = getPossibleMoves(board).indexOf(pairs.get(i).x);
+            for (int i = 0; i < pairs.length; i++) {
+                int idx = getPossibleMoves(board).indexOf(pairs[i] / 100);
                 minimax[idx] = Math.min(minimax[idx], winprobs[i]);
             }
             System.out.println(Arrays.toString(minimax));
@@ -221,20 +199,44 @@ class Game {
             }
 
             int move = getPossibleMoves(board).get(idx);
+
             movePrint(move, board);
             if(checkGameOver(board) != 0) {
-                Collections.sort(maxNumPairs);
+                //Collections.sort(maxNumPairs);
                 System.out.println(maxNumPairs.toString());
                 System.out.println("Game over yeet");
                 return;
             }
 
-            System.out.println("Num Pairs: " + pairs.size());
-            maxNumPairs.add(pairs.size());
+            System.out.println("Num Pairs: " + pairs.length);
+            maxNumPairs.add(pairs.length);
+
+            int userMove = registerRandomMove(getPossibleMoves(board));
+            movePrint(userMove, board);
         }
 
     }
 
+    private static short[] findAllPairs(byte[] board) {
+        ArrayList<pair> pairs = new ArrayList<>();
+        List<Integer> nextMoves = getPossibleMoves(board);
+        //System.out.println("next moves: " + nextMoves);
+        for (int i = 0; i < nextMoves.size(); i++) {
+            byte[] copy = copyOf(board, 93);
+            move(nextMoves.get(i), copy);
+            List<Integer> doubleMoves = getPossibleMoves(copy);
+            for (int j = 0; j < doubleMoves.size(); j++) {
+                pairs.add(new pair(nextMoves.get(i), doubleMoves.get(j)));
+            }
+        }
+        short[] formattedPairs = new short[pairs.size()];
+        int index = 0;
+        for(pair p : pairs) {
+            formattedPairs[index] = (short)(p.x * 100 + p.y);
+            index++;
+        }
+        return formattedPairs;
+    }
 
     private static class pair {
         int x;
