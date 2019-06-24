@@ -57,6 +57,46 @@ class BoardIO {
         return ((a - 65) * 9) + b;
     }
 
+    static void printGameTree(GameTree gameTree) {
+        System.out.println(asString(gameTree));
+    }
+
+    static String t4 = "|\t |\t |\t |---";
+    static String t3 = "|\t |\t |---";
+    static String t2 = "|\t |---";
+    static String t1 = "|---";
+    static String t0 = "";
+
+    static String asString(GameTree gameTree) {
+        if(gameTree.level == 0) {
+            return t4 + gameTree.move + "\n";
+        } else if (gameTree.level == 1) {
+            String ret = t3 + gameTree.move + "\n";
+            for(GameTree gt : gameTree.nextMoves) {
+                ret += asString(gt);
+            }
+            return ret;
+        } else if (gameTree.level == 2) {
+            String ret = t2 + gameTree.move + "\n";
+            for(GameTree gt : gameTree.nextMoves) {
+                ret += asString(gt);
+            }
+            return ret;
+        } else if (gameTree.level == 3){
+            String ret = t1 + gameTree.move + "\n";
+            for(GameTree gt : gameTree.nextMoves) {
+                ret += asString(gt);
+            }
+            return ret;
+        } else {
+            String ret = t0 + gameTree.move + "\n";
+            for(GameTree gt : gameTree.nextMoves) {
+                ret += asString(gt);
+            }
+            return ret;
+        }
+    }
+
 //    public static void main(String[] args) {
 //        System.out.print("int[] positions = {");
 //        for(char start = 'a'; start <= 'i'; start++) {

@@ -264,3 +264,12 @@ if (e != 0) {
 }
 
 24
+
+
+More Notes abt statistics:
+among multiple trials with same conditions, the wins tend to very by less than 2%
+out of 360 values of numpairs collected, only 26 were over 200, only 8 over 500, 18 over 400,
+
+Max Num Pairs most likely around 2000
+
+//make edge cases for possible moves when theres a tie on a local board
