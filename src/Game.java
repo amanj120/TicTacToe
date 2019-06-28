@@ -22,11 +22,11 @@ class Game {
      * arbitrarily: 1 == X (><), 2 == O (<>)
      */
 
+    private static final int GAME_OVER = 90;
     private static final int NUM_MOVES = 91;
     private static final int LAST_MOVE = 92;
     private static final Random random = new Random();
     private static Scanner sc = new Scanner(System.in);
-    private static ArrayList<Integer> maxNumPairs = new ArrayList<>();
 
     private static byte check3x3board(int boardIdx, byte[] board) {
         if(board[boardIdx + 81] != 0) {
@@ -60,12 +60,8 @@ class Game {
         return 0;
     }
 
-    public static byte checkGameOver(byte[] board) {
-        return check3x3board(9, board);
-    }
-
     public static boolean isGameOver(byte[] board) {
-        return (checkGameOver(board) != 0 || getPossibleMoves(board).size() == 0);
+        return (board[GAME_OVER] != 0 || getPossibleMoves(board).size() == 0);
     }
 
     static void move(int index, byte[] board) {
@@ -76,7 +72,7 @@ class Game {
             int before = board[parent(index)];
             board[parent(index)] = check3x3board((index/9), board);
             if(before != board[parent(index)]) {
-                board[90] = checkGameOver(board);
+                board[GAME_OVER] = check3x3board(9, board);
             }
         } else {
             throw new IllegalArgumentException("not a legal move: that space is taken");
@@ -86,9 +82,9 @@ class Game {
     static List<Integer> getPossibleMoves(byte[] board) {
         List<Integer> ret = new ArrayList<>();
         byte last = board[LAST_MOVE];
-        if ((board[NUM_MOVES] == 0)|| (board[parent(send(last))] != 0)) {
+        if ((board[parent(send(last))] != 0) || (board[NUM_MOVES] == 0)) {
             for (int i = 0; i < 81; i++) {
-                if(board[i] == 0 && board[parent((byte)i)] == 0){
+                if(board[i] == 0 && board[parent(i)] == 0) {
                     ret.add(i);
                 }
             }
@@ -126,8 +122,8 @@ class Game {
      * @return 1 if the computer won, 2 if the player won
      */
     private static int simulate(byte[] board) {
-        if(board[90] != 0) {
-            return board[90];
+        if(board[GAME_OVER] != 0) {
+            return board[GAME_OVER];
         } else {
             List<Integer> moves = getPossibleMoves(board);
             if(moves.size() == 0) { //tied game
@@ -166,9 +162,14 @@ class Game {
             }
 
             int cpuMove = registerCPUMove(poss, board);
+            //BoardIO.printGameTree(poss);
             poss = new GameTree(cpuMove, board, 2);
             movePrint(cpuMove, board);
             nums.add(poss.getSize());
+
+            if(isGameOver(board)) {
+                break;
+            }
         }
 
         System.out.println(nums.toString());
@@ -176,37 +177,24 @@ class Game {
     }
 
     private static int registerCPUMove(GameTree tree, byte[] board) {
+        int nt = 2000;
         for(GameTree level1 : tree.nextMoves) {
-            int min = 5000;
-            ArrayList<Integer> w = new ArrayList<>();
+            int min = nt;
             for(GameTree level2 : level1.nextMoves) {
                 int first = level1.move;
                 int second = level2.move;
                 byte[] copy = Arrays.copyOf(board, 93);
-                level2.wins = runSims(copy, 5000, 1);
-                level2.sims = 5000;
+                move(first, copy);
+                move(second, copy);
+                level2.wins = runSims(copy, nt, 1);
+                level2.sims = nt;
                 //System.out.println(first + ", " + second + ": " + level2.wins);
                 min = Math.min(min, level2.wins);
-                w.add(level2.wins);
             }
-            Collections.sort(w);
-
-            if(w.size() > 0 && w.get(0) == 0) {
-                level1.wins = 0;
-            } else {
-                int ww;
-                if (w.size() > 3) {
-                    ww = (w.get(0) + w.get(1) + w.get(2)) / 3;
-                } else if (w.size() == 2) {
-                    ww = (w.get(0) + w.get(1)) / 2;
-                } else if (w.size() == 1) {
-                    ww = w.get(0);
-                } else {
-                    ww = 0;
-                }
-                level1.wins = ww;
+            level1.wins = min;
+            if (min == nt) {
+                return level1.move;
             }
-
         }
         int max = -1;
         int ret = -1;
@@ -219,83 +207,6 @@ class Game {
         }
         return ret;
     }
-
-/*
-    private static int registerCPUMove(byte[] board) {
-        short[] pairs = findAllPairs(board);
-        maxNumPairs.add(pairs.length);
-        System.out.println("Num Pairs: " + pairs.length);
-        int move = findMiniMaxIdx(board, pairs);
-        return move;
-    }
-
-    private static int findMiniMaxIdx(byte[] board, short[] pairs) {
-        short[] winprobs = new short[pairs.length];
-        //System.out.println(pairs.toString());
-        for (int k = 0; k < pairs.length; k++) {
-            kernel(k, board, pairs, winprobs);
-            //System.out.println(formattedPairs[k]/100 + "," + formattedPairs[k]%100 + ":\t" + winprobs[k]);
-            if(k%(pairs.length/9) == 0)
-                System.out.print(k/(pairs.length/9)+1 + " ");
-        }
-        System.out.println();
-        int[] minimax = new int[getPossibleMoves(board).size()];
-        Arrays.fill(minimax, 10000000);
-        for (int i = 0; i < pairs.length; i++) {
-            int idx = getPossibleMoves(board).indexOf(pairs[i] / 100);
-            minimax[idx] = Math.min(minimax[idx], winprobs[i]);
-        }
-        System.out.println(Arrays.toString(minimax));
-
-        int max = 0;
-        int idx =-1;
-        for (int i = 0; i < minimax.length; i++) {
-            if (minimax[i] >= max) {
-                max = minimax[i];
-                idx = i;
-            }
-        }
-
-        int move = getPossibleMoves(board).get(idx);
-        return move;
-    }
-
-    private static short[] findAllPairs(byte[] board) {
-        ArrayList<pair> pairs = new ArrayList<>();
-        List<Integer> nextMoves = getPossibleMoves(board);
-        //System.out.println("next moves: " + nextMoves);
-        for (int i = 0; i < nextMoves.size(); i++) {
-            byte[] copy = copyOf(board, 93);
-            move(nextMoves.get(i), copy);
-            List<Integer> doubleMoves = getPossibleMoves(copy);
-            for (int j = 0; j < doubleMoves.size(); j++) {
-                pairs.add(new pair(nextMoves.get(i), doubleMoves.get(j)));
-            }
-        }
-        short[] formattedPairs = new short[pairs.size()];
-        int index = 0;
-        for(pair p : pairs) {
-            formattedPairs[index] = (short)(p.x * 100 + p.y);
-            index++;
-        }
-        return formattedPairs;
-    }
-
-    private static class pair {
-        int x;
-        int y;
-
-        private pair(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public String toString() {
-            return x + "," + y;
-        }
-    }
-*/
 
     public static int runSims(byte[] board, int numTrials, int winNum) {
         int ret = 0;
@@ -315,17 +226,6 @@ class Game {
             }
         }
         return ret;
-    }
-
-    private static void kernel(int idx, byte[] board, short[] pairs, short[] wins) {
-        int numTrials = 5000;
-        short p = pairs[idx];
-        int first = p/100;
-        int second = p%100;
-        byte[] copy = copyOf(board, 93);
-        move(first, copy);
-        move(second, copy);
-        wins[idx] = (short) runSims(copy, numTrials, 1);
     }
 
     private static int registerUserMove(List<Integer> possible) {

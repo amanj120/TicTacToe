@@ -273,3 +273,103 @@ out of 360 values of numpairs collected, only 26 were over 200, only 8 over 500,
 Max Num Pairs most likely around 2000
 
 //make edge cases for possible moves when theres a tie on a local board
+
+
+06-27-2019
+
+How many clock cycles does a simulation take?
+    Each check3x3Board ~ 20 cycles
+    Each move probably ~ 35
+    Each getPossibleMoves ~ avg is 50
+    Each player turn ~ 90
+    ~ 20 turns
+    Each simulate is somewhere between 500 - 5000 cycles
+
+    1GHz processor = 1e9 cycles per second
+
+    in 1 second between 2e5 and 2e6 simulations
+
+    (20,000 and 200,000)
+
+    avg probably 100,000
+
+    partition them into:
+
+
+OLD IMPLEMENTATION
+/*
+    private static int registerCPUMove(byte[] board) {
+        short[] pairs = findAllPairs(board);
+        maxNumPairs.add(pairs.length);
+        System.out.println("Num Pairs: " + pairs.length);
+        int move = findMiniMaxIdx(board, pairs);
+        return move;
+    }
+
+    private static int findMiniMaxIdx(byte[] board, short[] pairs) {
+        short[] winprobs = new short[pairs.length];
+        //System.out.println(pairs.toString());
+        for (int k = 0; k < pairs.length; k++) {
+            kernel(k, board, pairs, winprobs);
+            //System.out.println(formattedPairs[k]/100 + "," + formattedPairs[k]%100 + ":\t" + winprobs[k]);
+            if(k%(pairs.length/9) == 0)
+                System.out.print(k/(pairs.length/9)+1 + " ");
+        }
+        System.out.println();
+        int[] minimax = new int[getPossibleMoves(board).size()];
+        Arrays.fill(minimax, 10000000);
+        for (int i = 0; i < pairs.length; i++) {
+            int idx = getPossibleMoves(board).indexOf(pairs[i] / 100);
+            minimax[idx] = Math.min(minimax[idx], winprobs[i]);
+        }
+        System.out.println(Arrays.toString(minimax));
+
+        int max = 0;
+        int idx =-1;
+        for (int i = 0; i < minimax.length; i++) {
+            if (minimax[i] >= max) {
+                max = minimax[i];
+                idx = i;
+            }
+        }
+
+        int move = getPossibleMoves(board).get(idx);
+        return move;
+    }
+
+    private static short[] findAllPairs(byte[] board) {
+        ArrayList<pair> pairs = new ArrayList<>();
+        List<Integer> nextMoves = getPossibleMoves(board);
+        //System.out.println("next moves: " + nextMoves);
+        for (int i = 0; i < nextMoves.size(); i++) {
+            byte[] copy = copyOf(board, 93);
+            move(nextMoves.get(i), copy);
+            List<Integer> doubleMoves = getPossibleMoves(copy);
+            for (int j = 0; j < doubleMoves.size(); j++) {
+                pairs.add(new pair(nextMoves.get(i), doubleMoves.get(j)));
+            }
+        }
+        short[] formattedPairs = new short[pairs.size()];
+        int index = 0;
+        for(pair p : pairs) {
+            formattedPairs[index] = (short)(p.x * 100 + p.y);
+            index++;
+        }
+        return formattedPairs;
+    }
+
+    private static class pair {
+        int x;
+        int y;
+
+        private pair(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return x + "," + y;
+        }
+    }
+*/

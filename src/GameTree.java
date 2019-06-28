@@ -18,7 +18,7 @@ public class GameTree {
             this.level = level;
             byte[] copy = Arrays.copyOf(board, 93);
             Game.move(move, copy);
-            if(Game.checkGameOver(copy) == 0) {
+            if(Game.isGameOver(copy)) {
                 List<Integer> next = Game.getPossibleMoves(copy);
                 for (Integer i : next) {
                     nextMoves.add(new GameTree(i, copy, level - 1));
