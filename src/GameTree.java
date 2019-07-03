@@ -4,34 +4,72 @@ import java.util.List;
 
 public class GameTree {
     int move;
-    int level;
     int wins;
     int sims;
     ArrayList<GameTree> nextMoves = new ArrayList<>();
 
+    public GameTree(){nextMoves = new ArrayList<>();}
+
+    public GameTree(int move) {
+        this.move = move;
+        this.wins = 0;
+        this.sims = 0;
+    }
+
+    public GameTree(int move, int wins, int sims) {
+        this.move = move;
+        this.wins = wins;
+        this.sims = sims;
+    }
+
     public GameTree(int move, byte[] board, int level) {
-        if (level == 0) {
+        this(move, board, level, 1);
+    }
+
+    public GameTree(int move, byte[] board, int level, int l) {
+        if (level == l) {
             this.move = move;
-            this.level = 0;
         } else {
             this.move = move;
-            this.level = level;
             byte[] copy = Arrays.copyOf(board, 93);
             Game.move(move, copy);
-            if(Game.isGameOver(copy)) {
+            if(!Game.isGameOver(copy)) {
                 List<Integer> next = Game.getPossibleMoves(copy);
                 for (Integer i : next) {
-                    nextMoves.add(new GameTree(i, copy, level - 1));
+                    nextMoves.add(new GameTree(i, copy, level, l + 1));
                 }
             }
         }
     }
 
+    public boolean nextMovesContains(int i) {
+        for(GameTree gt : nextMoves) {
+            if(gt.move == i)
+                return true;
+        }
+        return false;
+    }
+
+
     public int getSize() {
-        if(level == 0) {
+        if(this.nextMoves.size() == 0) {
             return 1;
         } else {
             return nextMoves.stream().mapToInt(GameTree::getSize).sum();
         }
     }
+
+    @Override
+    public String toString() {
+        return formatInt(move) + ":\t[" + wins + "/" + sims + "]";
+    }
+
+    public String formatInt(int i ) {
+        if(i < 10) {
+            return "0" + i;
+        } else {
+            return "" + i;
+        }
+    }
+
 }

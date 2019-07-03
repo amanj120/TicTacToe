@@ -61,40 +61,20 @@ class BoardIO {
         System.out.println(asString(gameTree));
     }
 
-    static String t4 = "|\t |\t |\t |---";
-    static String t3 = "|\t |\t |---";
-    static String t2 = "|\t |---";
-    static String t1 = "|---";
-    static String t0 = "";
-
     static String asString(GameTree gameTree) {
-        if(gameTree.level == 0) {
-            return t4 + gameTree.move + "\n";
-        } else if (gameTree.level == 1) {
-            String ret = t3 + gameTree.move + "\n";
-            for(GameTree gt : gameTree.nextMoves) {
-                ret += asString(gt);
-            }
-            return ret;
-        } else if (gameTree.level == 2) {
-            String ret = t2 + gameTree.move + "\n";
-            for(GameTree gt : gameTree.nextMoves) {
-                ret += asString(gt);
-            }
-            return ret;
-        } else if (gameTree.level == 3){
-            String ret = t1 + gameTree.move + "\n";
-            for(GameTree gt : gameTree.nextMoves) {
-                ret += asString(gt);
-            }
-            return ret;
-        } else {
-            String ret = t0 + gameTree.move + "\n";
-            for(GameTree gt : gameTree.nextMoves) {
-                ret += asString(gt);
-            }
-            return ret;
+        return asString(gameTree, 0);
+    }
+
+    private static String asString(GameTree gameTree, int level) {
+        String str = "";
+        for(int i = 0; i < level; i++) {
+            str += "|\t ";
         }
+        str += "|-- " + gameTree.toString() + "\n";
+        for(GameTree gt : gameTree.nextMoves) {
+            str+= asString(gt, level + 1);
+        }
+        return str;
     }
 
 //    public static void main(String[] args) {

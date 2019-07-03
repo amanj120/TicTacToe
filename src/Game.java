@@ -145,14 +145,68 @@ class Game {
     }
 
     public static void main(String[] args) {
+        playStatefulGame();
+    }
+
+    private static void playStatefulGame() {
         byte[] board = new byte[93];
+        int startingMove = 99;
+        GameTree tree = new GameTree(startingMove);
+        for(int i : getPossibleMoves(board)) {
+            tree.nextMoves.add(new GameTree(i));
+        }
+        System.out.println(BoardIO.asString(tree));
+
+        while(true) {
+            BoardIO.printBoard(board);
+            int userMove = registerUserMove(getPossibleMoves(board));
+            movePrint(userMove, board);
+            for(GameTree gt: tree.nextMoves) {
+                if (gt.move == userMove) {
+                    tree = gt;
+                    break;
+                }
+            }
+            tree.move = userMove;
+            for(int i : getPossibleMoves(board)) {
+                if(!tree.nextMovesContains(i))
+                    tree.nextMoves.add(new GameTree(i));
+            }
+            //System.out.println(BoardIO.asString(tree));
+            int r = registerStatefulCPUMove(tree, board, 2);
+        }
+
+    }
+
+    private static int registerStatefulCPUMove(GameTree tree, byte[] board, int winNum) {
+        for(GameTree gt : tree.nextMoves) {
+            byte[] copy = Arrays.copyOf(board, 93);
+            move(gt.move, copy);
+            for(int i : getPossibleMoves(copy)) {
+                if(!tree.nextMovesContains(i)) {
+                    byte[] copy2 = Arrays.copyOf(copy, 93);
+                    move(i, copy2);
+                    int n = runSims(copy2, 2000, winNum);
+                    gt.nextMoves.add(new GameTree(i, n, 2000));
+                }
+            }
+        }
+        System.out.println(BoardIO.asString(tree));
+        return 0;
+    }
+
+    private static void playStatelessGame() {
+        byte[] board = new byte[93];
+        GameTree poss;// = new GameTree(40, board, 2, 0);
         movePrint(40, board);
 
         ArrayList<Integer> nums = new ArrayList<>();
-        GameTree poss;
+
+        //BoardIO.printGameTree(poss);
 
         while(true) {
             int userMove = registerUserMove(getPossibleMoves(board));
+            //int userMove = registerCPUMove(poss, board, 2);
             poss = new GameTree(userMove, board, 2);
             movePrint(userMove, board);
             nums.add(poss.getSize());
@@ -161,7 +215,10 @@ class Game {
                 break;
             }
 
-            int cpuMove = registerCPUMove(poss, board);
+            //System.out.println("here");
+            int cpuMove = registerCPUMove(poss, board, 1);
+            //BoardIO.printGameTree(poss);
+            //System.out.println(cpuMove);
             //BoardIO.printGameTree(poss);
             poss = new GameTree(cpuMove, board, 2);
             movePrint(cpuMove, board);
@@ -176,7 +233,7 @@ class Game {
         System.out.println("Game over yeet");
     }
 
-    private static int registerCPUMove(GameTree tree, byte[] board) {
+    private static int registerCPUMove(GameTree tree, byte[] board, int winNum) {
         int nt = 2000;
         for(GameTree level1 : tree.nextMoves) {
             int min = nt;
@@ -186,12 +243,13 @@ class Game {
                 byte[] copy = Arrays.copyOf(board, 93);
                 move(first, copy);
                 move(second, copy);
-                level2.wins = runSims(copy, nt, 1);
+                level2.wins = runSims(copy, nt, winNum);
                 level2.sims = nt;
                 //System.out.println(first + ", " + second + ": " + level2.wins);
                 min = Math.min(min, level2.wins);
             }
             level1.wins = min;
+            //System.out.println("\t\t" + level1.move + ", " + min);
             if (min == nt) {
                 return level1.move;
             }
@@ -199,7 +257,7 @@ class Game {
         int max = -1;
         int ret = -1;
         for(GameTree level1 : tree.nextMoves) {
-            System.out.println(BoardIO.getSeq(level1.move) + ": " + level1.wins);
+            //System.out.println(BoardIO.getSeq(level1.move) + ": " + level1.wins);
             if(level1.wins > max) {
                 max = level1.wins;
                 ret = level1.move;
