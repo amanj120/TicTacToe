@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-class BoardIO {
+class BoardIO implements TicTacToeIO{
     private static final String format = "" +
             "A0 A1 A2 | B0 B1 B2 | C0 C1 C2\n" +
             "A3 A4 A5 | B3 B4 B5 | C3 C4 C5\n" +
@@ -17,11 +17,13 @@ class BoardIO {
 
     private static final int[] positions = {157, 159, 161, 196, 198, 200, 235, 237, 239};
 
-    public static void printBoard(byte[] board) {
+    @Override
+    public void printBoard(byte[] board) {
         System.out.println(asString(board));
     }
 
-    public static void printPossibleMoves(byte[] board) {
+    @Override
+    public void printPossibleMoves(byte[] board) {
         List<String> print = new ArrayList<>();
         List<Integer> moves = Game.getPossibleMoves(board);
         for(Integer i : moves) {

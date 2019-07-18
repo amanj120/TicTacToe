@@ -373,3 +373,7 @@ OLD IMPLEMENTATION
         }
     }
 */
+
+
+Switching to stateless game so then it can be deployable easier on the cloud
+

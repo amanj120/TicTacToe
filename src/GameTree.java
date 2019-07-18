@@ -31,8 +31,10 @@ public class GameTree {
             this.move = move;
         } else {
             this.move = move;
-            byte[] copy = Arrays.copyOf(board, 93);
-            Game.move(move, copy);
+            byte[] copy = Arrays.copyOf(board, 94);
+            try {
+                Game.move(move, copy);
+            } catch (Exception e){}
             if(!Game.isGameOver(copy)) {
                 List<Integer> next = Game.getPossibleMoves(copy);
                 for (Integer i : next) {

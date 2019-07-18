@@ -25,7 +25,9 @@ class Game {
     private static final int GAME_OVER = 90;
     private static final int NUM_MOVES = 91;
     private static final int LAST_MOVE = 92;
-    private static final Random random = new Random();
+    private static final int PLAYER_MOVE_NUMBER = 93; // is the CPU the first or second player to move
+    private static final int BOARD_LENGTH = 94;
+    private static BoardIO bio;
     private static Scanner sc = new Scanner(System.in);
 
     private static byte check3x3board(int boardIdx, byte[] board) {
@@ -117,10 +119,6 @@ class Game {
         return (byte)((n%9) * 9);
     }
 
-    /**
-     * simulates a full game
-     * @return 1 if the computer won, 2 if the player won
-     */
     private static int simulate(byte[] board) {
         if(board[GAME_OVER] != 0) {
             return board[GAME_OVER];
@@ -129,118 +127,32 @@ class Game {
             if(moves.size() == 0) { //tied game
                 return -1;
             }
-            int nextIdx = random.nextInt(moves.size());
+            int nextIdx = getRandomInt(moves.size());
             move(moves.get(nextIdx), board);
             return simulate(board);
         }
     }
 
-    private static void movePrint(int move, byte[] board) {
-        System.out.println("moving " + BoardIO.getSeq(move));
-        move(move, board);
-        BoardIO.printBoard(board);
-        BoardIO.printPossibleMoves(board);
-        //System.out.println(Arrays.toString(board));
-        System.out.println();
+    static boolean playerMovesFirst(byte[] board) {
+        return board[PLAYER_MOVE_NUMBER] == 1;
     }
 
-    public static void main(String[] args) {
-        playStatefulGame();
+    public static void registerPlayerMoveNumber(byte[] board, byte playerMoveNumber) {
+        board[PLAYER_MOVE_NUMBER] = playerMoveNumber;
     }
 
-    private static void playStatefulGame() {
-        byte[] board = new byte[93];
-        int startingMove = 99;
-        GameTree tree = new GameTree(startingMove);
-        for(int i : getPossibleMoves(board)) {
-            tree.nextMoves.add(new GameTree(i));
-        }
-        System.out.println(BoardIO.asString(tree));
-
-        while(true) {
-            BoardIO.printBoard(board);
-            int userMove = registerUserMove(getPossibleMoves(board));
-            movePrint(userMove, board);
-            for(GameTree gt: tree.nextMoves) {
-                if (gt.move == userMove) {
-                    tree = gt;
-                    break;
-                }
-            }
-            tree.move = userMove;
-            for(int i : getPossibleMoves(board)) {
-                if(!tree.nextMovesContains(i))
-                    tree.nextMoves.add(new GameTree(i));
-            }
-            //System.out.println(BoardIO.asString(tree));
-            int r = registerStatefulCPUMove(tree, board, 2);
-        }
-
-    }
-
-    private static int registerStatefulCPUMove(GameTree tree, byte[] board, int winNum) {
-        for(GameTree gt : tree.nextMoves) {
-            byte[] copy = Arrays.copyOf(board, 93);
-            move(gt.move, copy);
-            for(int i : getPossibleMoves(copy)) {
-                if(!tree.nextMovesContains(i)) {
-                    byte[] copy2 = Arrays.copyOf(copy, 93);
-                    move(i, copy2);
-                    int n = runSims(copy2, 2000, winNum);
-                    gt.nextMoves.add(new GameTree(i, n, 2000));
-                }
-            }
-        }
-        System.out.println(BoardIO.asString(tree));
-        return 0;
-    }
-
-    private static void playStatelessGame() {
-        byte[] board = new byte[93];
-        GameTree poss;// = new GameTree(40, board, 2, 0);
-        movePrint(40, board);
-
-        ArrayList<Integer> nums = new ArrayList<>();
-
-        //BoardIO.printGameTree(poss);
-
-        while(true) {
-            int userMove = registerUserMove(getPossibleMoves(board));
-            //int userMove = registerCPUMove(poss, board, 2);
-            poss = new GameTree(userMove, board, 2);
-            movePrint(userMove, board);
-            nums.add(poss.getSize());
-
-            if(isGameOver(board)) {
-                break;
-            }
-
-            //System.out.println("here");
-            int cpuMove = registerCPUMove(poss, board, 1);
-            //BoardIO.printGameTree(poss);
-            //System.out.println(cpuMove);
-            //BoardIO.printGameTree(poss);
-            poss = new GameTree(cpuMove, board, 2);
-            movePrint(cpuMove, board);
-            nums.add(poss.getSize());
-
-            if(isGameOver(board)) {
-                break;
-            }
-        }
-
-        System.out.println(nums.toString());
-        System.out.println("Game over yeet");
-    }
-
-    private static int registerCPUMove(GameTree tree, byte[] board, int winNum) {
+    static int registerCPUMove(byte[] board) {
         int nt = 2000;
+        int level = 3;
+        int winNum = 3 - board[PLAYER_MOVE_NUMBER];
+
+        GameTree tree = new GameTree(board[LAST_MOVE], board, level);
         for(GameTree level1 : tree.nextMoves) {
             int min = nt;
             for(GameTree level2 : level1.nextMoves) {
                 int first = level1.move;
                 int second = level2.move;
-                byte[] copy = Arrays.copyOf(board, 93);
+                byte[] copy = Arrays.copyOf(board, BOARD_LENGTH);
                 move(first, copy);
                 move(second, copy);
                 level2.wins = runSims(copy, nt, winNum);
@@ -269,12 +181,12 @@ class Game {
     public static int runSims(byte[] board, int numTrials, int winNum) {
         int ret = 0;
         for(int i = 0; i < numTrials; i++) {
-            byte[] copy = copyOf(board, 93);
+            byte[] copy = copyOf(board, BOARD_LENGTH);
             int simulate = simulate(copy);
             if(simulate == winNum) {
                 ret++;
             }
-            if(i == numTrials / 10) {
+            if(i == numTrials / 10 && i > 20) {
                 if (ret == 0) {
                     return 0;
                 }
@@ -286,22 +198,7 @@ class Game {
         return ret;
     }
 
-    private static int registerUserMove(List<Integer> possible) {
-        System.out.println("enter your move below");
-        int m;
-        String input;
-        do {
-            input = sc.next();
-            try {
-                m = BoardIO.getInt(input);
-            } catch (Exception e) {
-                m = -1;
-            }
-        } while(!possible.contains(m));
-        return m;
-    }
-
-    private static int registerRandomMove(List<Integer> possible) {
-        return possible.get(random.nextInt(possible.size()));
+    private static int getRandomInt(int max) {
+        return (int) (Math.random() * max);
     }
 }
