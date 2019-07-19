@@ -44,6 +44,30 @@ public class GameTree {
         }
     }
 
+    public void addLevel(byte[] board){
+        if(nextMoves == null || nextMoves.size() == 0) {
+            byte[] copy = Arrays.copyOf(board, 94);
+            try {
+                Game.move(move, copy);
+            } catch(Exception e){}
+            if(!Game.isGameOver(copy)) {
+                List<Integer> next = Game.getPossibleMoves(copy);
+                for (Integer i : next) {
+                    nextMoves.add(new GameTree(i));
+                }
+            }
+        } else {
+            for(GameTree gt : nextMoves) {
+                byte[] copy = Arrays.copyOf(board, 94);
+                try {
+                    Game.move(move, copy);
+                } catch(Exception e){}
+                gt.addLevel(copy);
+            }
+        }
+    }
+
+
     public boolean nextMovesContains(int i) {
         for(GameTree gt : nextMoves) {
             if(gt.move == i)

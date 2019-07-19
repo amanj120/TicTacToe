@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -5,10 +6,14 @@ public class TerminalPlayer {
 
     private static Scanner sc;
     private static BoardIO bio = new BoardIO();
-    private static final int PLAYER_MOVE_NUMBER = 93; // is the CPU the first or second player to move
     private static final int BOARD_LENGTH = 94;
 
     public static void main(String[] args) {
+        play();
+
+    }
+
+    public static void play() {
         sc = new Scanner(System.in);
         byte[] board = new byte[BOARD_LENGTH];
 
@@ -38,6 +43,7 @@ public class TerminalPlayer {
 
         System.out.println("Game over yeet");
     }
+
 
 
 

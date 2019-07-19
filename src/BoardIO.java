@@ -79,6 +79,39 @@ class BoardIO implements TicTacToeIO{
         return str;
     }
 
+    public static void testGameTreeAddLevel() {
+        byte[] board = new byte[94];
+        Game.move(40, board);
+
+        ArrayList<Integer> sizes = new ArrayList<>();
+
+        GameTree gt = new GameTree(40, board, 1);
+        BoardIO.printGameTree(gt);
+        sizes.add(gt.getSize());
+
+        gt.addLevel(board);
+        BoardIO.printGameTree(gt);
+        sizes.add(gt.getSize());
+
+        gt.addLevel(board);
+        BoardIO.printGameTree(gt);
+        sizes.add(gt.getSize());
+
+        gt.addLevel(board);
+        BoardIO.printGameTree(gt);
+        sizes.add(gt.getSize());
+
+        gt.addLevel(board);
+        BoardIO.printGameTree(gt);
+        sizes.add(gt.getSize());
+
+        gt.addLevel(board);
+        BoardIO.printGameTree(gt);
+        sizes.add(gt.getSize());
+
+        System.out.println(sizes);
+    }
+
 //    public static void main(String[] args) {
 //        System.out.print("int[] positions = {");
 //        for(char start = 'a'; start <= 'i'; start++) {
