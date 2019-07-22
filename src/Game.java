@@ -166,40 +166,45 @@ class Game {
         System.out.println(actualLeaves);
         System.out.println(level);
 
-        int nt = (int) (1000000L / (long) actualLeaves);
-        System.out.println(nt);
-        minimax(tree, level, nt, board);
+        while(curLev > level) {
+            tree.removeLevel();
+            curLev--;
+        }
 
-        for(GameTree level1 : tree.nextMoves) {
-            int min = nt;
-            for(GameTree level2 : level1.nextMoves) {
-                int first = level1.move;
-                int second = level2.move;
-                byte[] copy = Arrays.copyOf(board, BOARD_LENGTH);
-                move(first, copy);
-                move(second, copy);
-                level2.wins = runSims(copy, nt, winNum);
-                level2.sims = nt;
-                //System.out.println(first + ", " + second + ": " + level2.wins);
-                min = Math.min(min, level2.wins);
-            }
-            level1.wins = min;
-            //System.out.println("\t\t" + level1.move + ", " + min);
-            if (min == nt) {
-                return level1.move;
-            }
-        }
-        int max = -1;
-        int ret = -1;
-        for(GameTree level1 : tree.nextMoves) {
-            //System.out.println(BoardIO.getSeq(level1.move) + ": " + level1.wins);
-            if(level1.wins > max) {
-                max = level1.wins;
-                ret = level1.move;
-            }
-        }
-        //BoardIO.printGameTree(tree);
-        return ret;
+        int nt = (1000000 / actualLeaves);
+        System.out.println(nt);
+        return minimax(tree, level, nt, board);
+
+//        for(GameTree level1 : tree.nextMoves) {
+//            int min = nt;
+//            for(GameTree level2 : level1.nextMoves) {
+//                int first = level1.move;
+//                int second = level2.move;
+//                byte[] copy = Arrays.copyOf(board, BOARD_LENGTH);
+//                move(first, copy);
+//                move(second, copy);
+//                level2.wins = runSims(copy, nt, winNum);
+//                level2.sims = nt;
+//                //System.out.println(first + ", " + second + ": " + level2.wins);
+//                min = Math.min(min, level2.wins);
+//            }
+//            level1.wins = min;
+//            //System.out.println("\t\t" + level1.move + ", " + min);
+//            if (min == nt) {
+//                return level1.move;
+//            }
+//        }
+//        int max = -1;
+//        int ret = -1;
+//        for(GameTree level1 : tree.nextMoves) {
+//            //System.out.println(BoardIO.getSeq(level1.move) + ": " + level1.wins);
+//            if(level1.wins > max) {
+//                max = level1.wins;
+//                ret = level1.move;
+//            }
+//        }
+//        //BoardIO.printGameTree(tree);
+//        return ret;
     }
 
     public static int minimax(GameTree tree, int levels, int numTrials, byte[] board) {
@@ -207,8 +212,17 @@ class Game {
         for(GameTree gt : tree.nextMoves) {
             minimax(gt, levels - 1, true, numTrials, board);
         }
+
+        int max = -1;
+        int ret = -1;
+        for(GameTree gt : tree.nextMoves) {
+            if(gt.wins > max) {
+                max = gt.wins;
+                ret = gt.move;
+            }
+        }
         BoardIO.printGameTree(tree);
-        return 0;
+        return ret;
     }
 
     public static void minimax(GameTree tree, int levelsLeft, boolean useMin, int numTrials, byte[] board){

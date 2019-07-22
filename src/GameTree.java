@@ -67,6 +67,16 @@ public class GameTree {
         }
     }
 
+    public void removeLevel(){
+        if(getDepth() > 1) {
+            if (getDepth() == 2) {
+                this.nextMoves = new ArrayList<>();
+            } else {
+                nextMoves.stream().forEach(GameTree::removeLevel);
+            }
+        }
+    }
+
 
     public boolean nextMovesContains(int i) {
         for(GameTree gt : nextMoves) {
@@ -76,6 +86,13 @@ public class GameTree {
         return false;
     }
 
+    public int getDepth() {
+        if(nextMoves == null || nextMoves.size() == 0) {
+            return 1;
+        } else {
+            return 1 + nextMoves.get(0).getDepth();
+        }
+    }
 
     public int getSize() {
         if(this.nextMoves.size() == 0) {

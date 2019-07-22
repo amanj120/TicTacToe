@@ -97,7 +97,7 @@ class BoardIO implements TicTacToeIO{
         BoardIO.printGameTree(gt);
         sizes.add(gt.getSize());
 
-        gt.addLevel(board);
+        gt.removeLevel();
         BoardIO.printGameTree(gt);
         sizes.add(gt.getSize());
 
@@ -105,7 +105,11 @@ class BoardIO implements TicTacToeIO{
         BoardIO.printGameTree(gt);
         sizes.add(gt.getSize());
 
-        gt.addLevel(board);
+        gt.removeLevel();
+        BoardIO.printGameTree(gt);
+        sizes.add(gt.getSize());
+
+        gt.removeLevel();
         BoardIO.printGameTree(gt);
         sizes.add(gt.getSize());
 
@@ -113,10 +117,6 @@ class BoardIO implements TicTacToeIO{
     }
 
 //    public static void main(String[] args) {
-//        System.out.print("int[] positions = {");
-//        for(char start = 'a'; start <= 'i'; start++) {
-//            System.out.print(format.indexOf(start) + ", ");
-//        }
-//        System.out.println("};");
+//        testGameTreeAddLevel();
 //    }
 }
