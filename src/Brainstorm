@@ -85,3 +85,16 @@ Game Main method (for debugging)
 to make this parallelizable:
 
 the board needs to be copied into the gpu, and needs to be lightweight
+
+
+copy into GPU:
+
+the board at current stage
+a list of all pairs
+a list with win percentages for all pairs
+
+each kernel:
+
+copies board and makes the two moves (one copy, 93 bytes)
+
+for 100 trials, copie
