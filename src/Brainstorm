@@ -86,6 +86,7 @@ to make this parallelizable:
 
 the board needs to be copied into the gpu, and needs to be lightweight
 
+<<<<<<< HEAD
 
 copy into GPU:
 
@@ -98,3 +99,299 @@ each kernel:
 copies board and makes the two moves (one copy, 93 bytes)
 
 for 100 trials, copie
+=======
+6/17/19
+
+Need to make finding all pairs more efficient, less array copies
+need to decide if it's worth it to prune branches based on averages, maybe go a layer deeper for each unpruned branch
+gotta be smart
+
+a b c
+d e f
+g h i
+
+ 1    2    3    4    5    6    7    8
+abc, def, ghi, adg, beh, cfi, aei, gec
+
+
+abc, def, ghi, aei
+
+3, 5, 7, 11
+
+a 1, 4      33
+b 1         3
+c 1         3
+d 2         5
+e 2, 4      55
+f 2         5
+g 3         7
+h 3         7
+i 3, 4      77
+
+33  3   3
+5   55  5
+7   7   77
+
+3   5   77
+3   55  7
+33  5   7
+
+2 matchers
+2 inputs
+8 mods
+
+AA = 1;
+AB = 1;
+BA = 1;
+BB = 1;
+
+int[] matcha = {33, 3, 3, 5, 55, 5, 7, 7, 77};
+int[] matchb = {3, 5, 77, 3, 55, 7, 33, 5, 7};
+
+for (1,9) {
+    if (board[i] == 1) {
+        AA *= matcha[i];
+        AB *= matchb[i];
+    }
+    if (board[i] == 2) {
+        BA *= matcha[i];
+        BB *= matchb[i];
+    }
+}
+for (27, 125, 343, 1331)
+    for (AA, AB, BA, BB) {
+        if div then return
+    }
+
+    /*
+        private static final int[] matcha = {33, 3, 3, 5, 55, 5, 7, 7, 77};
+        private static final int[] matchb = {3, 5, 77, 3, 55, 7, 33, 5, 7};
+
+        private static byte check3x3board(int boardIdx, byte[] board) {
+            if(board[boardIdx + 81] != 0) {
+                return board[boardIdx + 81];
+            }
+            int start = boardIdx * 9;
+            int AA = 1, AB = 1, BA = 1, BB = 1;
+            for(int i = 0; i < 9; i++) {
+                if (board[i + start] == 1) {
+                    AA *= matcha[i];
+                    AB *= matchb[i];
+                } else if (board[i + start] == 2) {
+                    BA *= matcha[i];
+                    BB *= matchb[i];
+                }
+            }
+            int[] cubes = {27, 125, 343, 1331};
+            for(int c : cubes) {
+                if(AA % c == 0 || AB % c == 0)
+                    return 1;
+                if(BA % c == 0 || BB % c == 0)
+                    return 2;
+            }
+            return 0;
+        }
+        */
+
+
+
+adg
+
+
+
+adg, beh, cfi, gec
+
+
+
+1, 2, 3, 4, 5,  6,  7,  8
+23, 3, 5, 7, 11, 13, 17, 19
+
+a: 1, 4, 7      23 * 7 * 17         2737
+b: 1, 5         23 * 11             253
+c: 1, 6, 8      23 * 13 * 19        5681
+d: 2, 4         3 * 7               21
+e: 2, 5, 7, 8   3 * 11 * 17 * 19    10659
+f: 2, 6         3 * 13              39
+g: 3, 4, 8      5 * 7  * 19         665
+h: 3, 5         5 * 11              55
+i: 3, 6, 7      5 * 13 * 17         1105
+
+2737 * 253 * 5681 * 21 * 10659 * 39 * 665 * 55 * 1105
+
+3081597750
+
+
+   1  2
+1  0  0
+2  0  0
+3  0  0
+4  0  0
+5  0  0
+6  0  0
+7  0  0
+8  0  0
+
+a b c
+d e f
+g h i
+
+if (e != 0) {
+    if (b!= 0) {
+        if(e == b && e == h) {
+            return e;
+        }
+    } else if (d != 0) {
+        if(e == d && e == f) {
+            return e;
+        }
+    } else if (a != 0) {
+        if(e == a && e == i) {
+            return e;
+        }
+    } else if (g != 0) {
+        if(e == g && e == c) {
+            return e;
+        }
+    }
+} else if (a != 0) {
+    if (b!= 0) {
+        if(a == b && a == c) {
+            return a;
+        }
+    } else if (d != 0) {
+        if(a == d && a == g) {
+            return a;
+        }
+    }
+} else if (i != 0) {
+    if (h!= 0) {
+        if(i == h && i == g) {
+            return i;
+        }
+    } else if (f != 0) {
+        if(i == f && i == c) {
+            return i;
+        }
+    }
+} else {
+    return 0;
+}
+
+24
+
+
+More Notes abt statistics:
+among multiple trials with same conditions, the wins tend to very by less than 2%
+out of 360 values of numpairs collected, only 26 were over 200, only 8 over 500, 18 over 400,
+
+Max Num Pairs most likely around 2000
+
+//make edge cases for possible moves when theres a tie on a local board
+
+
+06-27-2019
+
+How many clock cycles does a simulation take?
+    Each check3x3Board ~ 20 cycles
+    Each move probably ~ 35
+    Each getPossibleMoves ~ avg is 50
+    Each player turn ~ 90
+    ~ 20 turns
+    Each simulate is somewhere between 500 - 5000 cycles
+
+    1GHz processor = 1e9 cycles per second
+
+    in 1 second between 2e5 and 2e6 simulations
+
+    (20,000 and 200,000)
+
+    avg probably 100,000
+
+    partition them into:
+
+
+OLD IMPLEMENTATION
+/*
+    private static int registerCPUMove(byte[] board) {
+        short[] pairs = findAllPairs(board);
+        maxNumPairs.add(pairs.length);
+        System.out.println("Num Pairs: " + pairs.length);
+        int move = findMiniMaxIdx(board, pairs);
+        return move;
+    }
+
+    private static int findMiniMaxIdx(byte[] board, short[] pairs) {
+        short[] winprobs = new short[pairs.length];
+        //System.out.println(pairs.toString());
+        for (int k = 0; k < pairs.length; k++) {
+            kernel(k, board, pairs, winprobs);
+            //System.out.println(formattedPairs[k]/100 + "," + formattedPairs[k]%100 + ":\t" + winprobs[k]);
+            if(k%(pairs.length/9) == 0)
+                System.out.print(k/(pairs.length/9)+1 + " ");
+        }
+        System.out.println();
+        int[] minimax = new int[getPossibleMoves(board).size()];
+        Arrays.fill(minimax, 10000000);
+        for (int i = 0; i < pairs.length; i++) {
+            int idx = getPossibleMoves(board).indexOf(pairs[i] / 100);
+            minimax[idx] = Math.min(minimax[idx], winprobs[i]);
+        }
+        System.out.println(Arrays.toString(minimax));
+
+        int max = 0;
+        int idx =-1;
+        for (int i = 0; i < minimax.length; i++) {
+            if (minimax[i] >= max) {
+                max = minimax[i];
+                idx = i;
+            }
+        }
+
+        int move = getPossibleMoves(board).get(idx);
+        return move;
+    }
+
+    private static short[] findAllPairs(byte[] board) {
+        ArrayList<pair> pairs = new ArrayList<>();
+        List<Integer> nextMoves = getPossibleMoves(board);
+        //System.out.println("next moves: " + nextMoves);
+        for (int i = 0; i < nextMoves.size(); i++) {
+            byte[] copy = copyOf(board, 93);
+            move(nextMoves.get(i), copy);
+            List<Integer> doubleMoves = getPossibleMoves(copy);
+            for (int j = 0; j < doubleMoves.size(); j++) {
+                pairs.add(new pair(nextMoves.get(i), doubleMoves.get(j)));
+            }
+        }
+        short[] formattedPairs = new short[pairs.size()];
+        int index = 0;
+        for(pair p : pairs) {
+            formattedPairs[index] = (short)(p.x * 100 + p.y);
+            index++;
+        }
+        return formattedPairs;
+    }
+
+    private static class pair {
+        int x;
+        int y;
+
+        private pair(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return x + "," + y;
+        }
+    }
+*/
+
+
+Switching to stateless game so then it can be deployable easier on the cloud
+
+GameTree Sizes
+
+5376, 4487, 4657, 4312, 3974, 3644, 3322, 2773, 2810, 2841, 1779, 9174, 1986, 1776, 7708, 6930, 4980, 3438, 8258, 5107, 6748, 5445, 1590, 2052, 8075,
+>>>>>>> 0c8ca18ada9ee527353707adc5eac28609a85237
